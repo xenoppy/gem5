@@ -46,7 +46,7 @@ uPIM::uPIM(const uPIMParams &p) :
         (char*)"./src/uPIMulator",                                // argv[0]: 程序名
         (char*)"--benchmark", (char*)"RED",                               // argv[1], argv[2]
         (char*)"--num_tasklets", (char*)"16",                            // argv[3], argv[4]
-        (char*)"--bindir", (char*)"/home/weichu/private/gem5/src/pim/bin/1_dpus/RED.16", // argv[5], argv[6]
+        (char*)"--bindir", (char*)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
         (char*)"--logdir", (char*)"."                                    // argv[7], argv[8]
     };
     int argc = sizeof(argv) / sizeof(argv[0]);

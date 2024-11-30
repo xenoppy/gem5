@@ -28,7 +28,7 @@ Import ("*")
 import os
 
 env.Append(LIBS=["stdc++fs"])
-env.Append(CPPPATH=['/home/weichu/private/gem5/src/pim/uPIMulator_backend/src'])
+env.Append(CPPPATH=['/home/weichu/my_gem5/gem5/src/pim/uPIMulator_backend/src'])
 
 SimObject('uPIM.py', sim_objects=[
     'Dpu',
@@ -38,7 +38,7 @@ SimObject('uPIM.py', sim_objects=[
 print('hi uPIM.cc')
 Source('uPIM.cc')
 
-for root, dirs, files in os.walk('/home/weichu/private/gem5/src/pim/uPIMulator_backend/src'):
+for root, dirs, files in os.walk('/home/weichu/my_gem5/gem5/src/pim/uPIMulator_backend/src'):
     print(root)
     for file in files:
         if file.endswith('.cc'):
