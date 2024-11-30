@@ -33,13 +33,13 @@
 namespace gem5
 {
 Dpu::Dpu(const DpuParams &p) :
-    SimObject(p) 
+    SimObject(p)
 {
     printf("enter DPU\n");
 }
 
 uPIM::uPIM(const uPIMParams &p) :
-    Dpu(p) 
+    Dpu(p) ,dpu_cycle_(p.dpu_cycle),cycle_event([this]{processCycle();},name())
 {
     printf("enter uPIM\n");\
     char *argv[] = {
@@ -51,10 +51,20 @@ uPIM::uPIM(const uPIMParams &p) :
     };
     int argc = sizeof(argv) / sizeof(argv[0]);
     
-    start(argc,argv);
+    //start(argc,argv);
     
 }
 
-       
+void uPIM::startup()
+{
+    schedule(cycle_event, dpu_cycle_);
+}
+
+void uPIM::processCycle()
+{
+    printf("%s: enter processCycle\n",this->name().c_str());    
+    schedule(cycle_event, curTick() + dpu_cycle_);
+}
+
 
 } // namespace gem5

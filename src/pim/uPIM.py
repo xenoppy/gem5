@@ -33,9 +33,11 @@ class Dpu(SimObject):
     abstract = True
     cxx_header = "pim/uPIM.hh"
     cxx_class = "gem5::Dpu"
-
-
+   
 class uPIM(Dpu):
     type = "uPIM"
     cxx_header = "pim/uPIM.hh"
     cxx_class = "gem5::uPIM"
+    dpu_cycle = Param.Latency("Ticks per DPU Cycle")
+    
+

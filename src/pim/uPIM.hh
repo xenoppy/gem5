@@ -45,9 +45,15 @@ class Dpu : public SimObject
 
 class uPIM : public Dpu
 {
-
+  private:
+  
+    void processCycle();
+    EventFunctionWrapper cycle_event;
+    const Tick dpu_cycle_;
   public:
     uPIM(const uPIMParams &p);
+    
+    void startup() override;
 };
 
 
