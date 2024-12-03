@@ -29,34 +29,35 @@
 #ifndef __UPIM_HH__
 #define __UPIM_HH__
 
+#include "simulator/system.h"
+#include "util/argument_parser.h"
 #include "params/Dpu.hh"
 #include "params/uPIM.hh"
 #include "sim/sim_object.hh"
 
 namespace gem5
 {
-class Dpu : public SimObject
-{
+  class Dpu : public SimObject
+  {
 
   public:
     Dpu(const DpuParams &p);
+  };
 
-};
-
-class uPIM : public Dpu
-{
+  class uPIM : public Dpu
+  {
   private:
-  
+    upmem_sim::util::ArgumentParser *argument_parser;
+    upmem_sim::simulator::System *system;
     void processCycle();
     EventFunctionWrapper cycle_event;
     const Tick dpu_cycle_;
+
   public:
     uPIM(const uPIMParams &p);
-    
+
     void startup() override;
-};
-
-
+  };
 
 } // namespace gem5
 

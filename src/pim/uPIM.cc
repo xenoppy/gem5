@@ -29,42 +29,84 @@
 #include "pim/uPIM.hh"
 #include "pim/uPIMulator_backend/src/external.hh"
 
-
 namespace gem5
 {
-Dpu::Dpu(const DpuParams &p) :
-    SimObject(p)
-{
-    printf("enter DPU\n");
-}
+    Dpu::Dpu(const DpuParams &p) : SimObject(p)
+    {
+        printf("enter DPU\n");
+    }
 
-uPIM::uPIM(const uPIMParams &p) :
-    Dpu(p) ,dpu_cycle_(p.dpu_cycle),cycle_event([this]{processCycle();},name())
-{
-    printf("enter uPIM\n");\
-    char *argv[] = {
-        (char*)"./src/uPIMulator",                                // argv[0]: 程序名
-        (char*)"--benchmark", (char*)"RED",                               // argv[1], argv[2]
-        (char*)"--num_tasklets", (char*)"16",                            // argv[3], argv[4]
-        (char*)"--bindir", (char*)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
-        (char*)"--logdir", (char*)"."                                    // argv[7], argv[8]
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]);
-    
-    //start(argc,argv);
-    
-}
+    uPIM::uPIM(const uPIMParams &p) : Dpu(p), dpu_cycle_(p.dpu_cycle), cycle_event([this]
+                                                                                   { processCycle(); }, name())
+    {
+        printf("enter uPIM\n");
 
-void uPIM::startup()
-{
-    schedule(cycle_event, dpu_cycle_);
-}
+        // start(argc,argv);
+    }
 
-void uPIM::processCycle()
-{
-    printf("%s: enter processCycle\n",this->name().c_str());    
-    schedule(cycle_event, curTick() + dpu_cycle_);
-}
+    void uPIM::startup()
+    {
+        argument_parser = upmem_sim::init_argument_parser();
+        char *argv[] = {
+            (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
+            (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
+            (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
+            (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
+            (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
+        };
+        int argc = sizeof(argv) / sizeof(argv[0]);
+        argument_parser->parse(argc, argv);
+        system = new upmem_sim::simulator::System(argument_parser);
+        system->init();
+        schedule(cycle_event, dpu_cycle_);
+    }
 
+    void uPIM::processCycle()
+    {
+
+        // printf("%s: enter processCycle\n", this->name().c_str());
+        if (not system->is_finished())
+        {
+
+            system->cycle();
+            schedule(cycle_event, curTick() + dpu_cycle_);
+        }
+        else
+        {
+            printf("uPIM: system is finished\n");
+
+            system->fini();
+
+            for (auto &option : argument_parser->options())
+            {
+                if (argument_parser->option_type(option) ==
+                    upmem_sim::util::ArgumentParser::INT)
+                {
+                    std::cout << option << ": " << argument_parser->get_int_parameter(option)
+                              << std::endl;
+                }
+                else if (argument_parser->option_type(option) ==
+                         upmem_sim::util::ArgumentParser::STRING)
+                {
+                    std::cout << option << ": "
+                              << argument_parser->get_string_parameter(option) << std::endl;
+                }
+                else
+                {
+                    throw std::invalid_argument("");
+                }
+            }
+
+            upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
+            for (auto &stat : system_stat_factory->stats())
+            {
+                std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+            }
+            delete system_stat_factory;
+
+            delete argument_parser;
+            delete system;
+        }
+    }
 
 } // namespace gem5
