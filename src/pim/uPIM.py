@@ -38,6 +38,7 @@ class uPIM(Dpu):
     type = "uPIM"
     cxx_header = "pim/uPIM.hh"
     cxx_class = "gem5::uPIM"
-    dpu_cycle = Param.Latency("Ticks per DPU Cycle")
+    cpu_clock = Param.Latency("Ticks per CPU Cycle")
+    rank_clock = Param.Latency("Ticks per Rank Cycle")
     
 

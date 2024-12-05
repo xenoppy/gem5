@@ -5,36 +5,40 @@
 #include "simulator/dpu/dpu.h"
 #include "simulator/rank/rank.h"
 
-namespace upmem_sim::simulator {
+namespace upmem_sim::simulator
+{
 
-class System {
- public:
-  explicit System(util::ArgumentParser *argument_parser);
-  ~System();
+  class System
+  {
+  public:
+    explicit System(util::ArgumentParser *argument_parser);
+    ~System();
 
-  util::StatFactory *stat_factory();
+    util::StatFactory *stat_factory();
 
-  bool is_finished() { return execuion_ == cpu_->num_executions(); }
+    bool is_finished() { return execuion_ == cpu_->num_executions(); }
 
-  void init();
-  void fini() { cpu_->fini(); }
-  void cycle();
+    void init();
+    void fini() { cpu_->fini(); }
+    void cycle();
+    void cpu_cycle();
+    void rank_cycle();
 
- protected:
-  bool is_zombie() { return rank_->is_zombie(); }
+  protected:
+    bool is_zombie() { return rank_->is_zombie(); }
 
- private:
-  cpu::CPU *cpu_;
-  rank::Rank *rank_;
+  private:
+    cpu::CPU *cpu_;
+    rank::Rank *rank_;
 
-  int execuion_;
+    int execuion_;
 
-  util::StatFactory *stat_factory_;
+    util::StatFactory *stat_factory_;
 
-  // Tae
-  std::string benchmark;
-};
+    // Tae
+    std::string benchmark;
+  };
 
-}  // namespace upmem_sim::simulator
+} // namespace upmem_sim::simulator
 
 #endif

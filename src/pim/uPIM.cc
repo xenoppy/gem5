@@ -28,6 +28,7 @@
 
 #include "pim/uPIM.hh"
 #include "pim/uPIMulator_backend/src/external.hh"
+#include "uPIM.hh"
 
 namespace gem5
 {
@@ -36,8 +37,13 @@ namespace gem5
         printf("enter DPU\n");
     }
 
-    uPIM::uPIM(const uPIMParams &p) : Dpu(p), dpu_cycle_(p.dpu_cycle), cycle_event([this]
-                                                                                   { processCycle(); }, name())
+    uPIM::uPIM(const uPIMParams &p) : Dpu(p), cpu_clock(p.cpu_clock), rank_clock(p.rank_clock),
+                                      cycle_event([this]
+                                                  { processCycle(); }, name()),
+                                      rank_cycle_event([this]
+                                                       { process_rank_Cycle(); }, name()),
+                                      cpu_cycle_event([this]
+                                                      { process_cpu_Cycle(); }, name())
     {
         printf("enter uPIM\n");
 
@@ -58,7 +64,8 @@ namespace gem5
         argument_parser->parse(argc, argv);
         system = new upmem_sim::simulator::System(argument_parser);
         system->init();
-        schedule(cycle_event, dpu_cycle_);
+        schedule(cpu_cycle_event, curTick() + cpu_clock);
+        schedule(rank_cycle_event, curTick() + rank_clock);
     }
 
     void uPIM::processCycle()
@@ -67,9 +74,8 @@ namespace gem5
         // printf("%s: enter processCycle\n", this->name().c_str());
         if (not system->is_finished())
         {
-
-            system->cycle();
-            schedule(cycle_event, curTick() + dpu_cycle_);
+            // system->cycle();
+            // schedule(cycle_event, curTick() + dpu_cycle_);
         }
         else
         {
@@ -108,5 +114,57 @@ namespace gem5
             delete system;
         }
     }
+    void uPIM::process_rank_Cycle()
+    {
+        if (not system->is_finished())
+        {
+            system->rank_cycle();
+            schedule(rank_cycle_event, curTick() + rank_clock);
+        }
+    }
+    void uPIM::process_cpu_Cycle()
+    {
+        if (not system->is_finished())
+        {
+            system->cpu_cycle();
+            schedule(cpu_cycle_event, curTick() + cpu_clock);
+        }
 
+        else
+        {
+            printf("uPIM: system is finished\n");
+
+            system->fini();
+
+            for (auto &option : argument_parser->options())
+            {
+                if (argument_parser->option_type(option) ==
+                    upmem_sim::util::ArgumentParser::INT)
+                {
+                    std::cout << option << ": " << argument_parser->get_int_parameter(option)
+                              << std::endl;
+                }
+                else if (argument_parser->option_type(option) ==
+                         upmem_sim::util::ArgumentParser::STRING)
+                {
+                    std::cout << option << ": "
+                              << argument_parser->get_string_parameter(option) << std::endl;
+                }
+                else
+                {
+                    throw std::invalid_argument("");
+                }
+            }
+
+            upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
+            for (auto &stat : system_stat_factory->stats())
+            {
+                std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+            }
+            delete system_stat_factory;
+
+            delete argument_parser;
+            delete system;
+        }
+    }
 } // namespace gem5

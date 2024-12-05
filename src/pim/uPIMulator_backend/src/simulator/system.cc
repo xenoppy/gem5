@@ -42,12 +42,9 @@ namespace upmem_sim::simulator
     cpu_->sched(execuion_);
     cpu_->launch();
   }
-
-  void System::cycle()
+  void System::cpu_cycle()
   {
-    //遍历所有dpu看看有没有完成执行的dpu，需要被shutdown成zombie
     cpu_->cycle();
-    rank_->cycle();
 
     if (is_zombie())
     {
@@ -64,6 +61,16 @@ namespace upmem_sim::simulator
         cpu_->launch();
       }
     }
+  }
+  void System::rank_cycle()
+  {
+    rank_->cycle();
+  }
+  void System::cycle()
+  {
+    // 遍历所有dpu看看有没有完成执行的dpu，需要被shutdown成zombie
+    cpu_->cycle();
+    rank_->cycle();
   }
 
 } // namespace upmem_sim::simulator
