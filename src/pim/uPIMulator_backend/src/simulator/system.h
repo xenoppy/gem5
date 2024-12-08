@@ -22,6 +22,7 @@ namespace upmem_sim::simulator
     void fini() { cpu_->fini(); }
     void cycle();
     void cpu_cycle();
+    void dpu_check_cycle();
     void rank_cycle();
 
   protected:

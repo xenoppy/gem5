@@ -160,7 +160,7 @@ class BaseCPU(ClockedObject):
     icache_port = RequestPort("Instruction Port")
     dcache_port = RequestPort("Data Port")
 
-    dpu_port = ResponsePort("DPU Port")
+    dpu_port = RequestPort("DPU Port")
     
     _cached_ports = ["icache_port", "dcache_port"]
 

@@ -1,4 +1,5 @@
 #include "simulator/system.h"
+#include "system.h"
 
 namespace upmem_sim::simulator
 {
@@ -61,6 +62,10 @@ namespace upmem_sim::simulator
         cpu_->launch();
       }
     }
+  }
+  void System::dpu_check_cycle()
+  {
+    cpu_->cycle();
   }
   void System::rank_cycle()
   {

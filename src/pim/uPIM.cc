@@ -32,139 +32,240 @@
 
 namespace gem5
 {
-    Dpu::Dpu(const DpuParams &p) : SimObject(p)
-    {
-        printf("enter DPU\n");
-    }
+  Dpu::Dpu(const DpuParams &p) : SimObject(p)
+  {
+    printf("enter DPU\n");
+  }
 
-    uPIM::uPIM(const uPIMParams &p) : Dpu(p), cpu_clock(p.cpu_clock), rank_clock(p.rank_clock),
-                                      cycle_event([this]
-                                                  { processCycle(); }, name()),
-                                      rank_cycle_event([this]
-                                                       { process_rank_Cycle(); }, name()),
-                                      cpu_cycle_event([this]
-                                                      { process_cpu_Cycle(); }, name())
-    {
-        printf("enter uPIM\n");
+  uPIM::uPIM(const uPIMParams &p) : Dpu(p), cpu_clock(p.cpu_clock), rank_clock(p.rank_clock),
+                                    cycle_event([this]
+                                                { processCycle(); }, name()),
+                                    rank_cycle_event([this]
+                                                     { process_rank_Cycle(); }, name()),
+                                    cpu_cycle_event([this]
+                                                    { process_cpu_Cycle(); }, name()),
+                                    cpusidePort(name() + ".cpu_side", this),
+                                    system(nullptr)
+  {
+    printf("enter uPIM\n");
 
-        // start(argc,argv);
-    }
+    // start(argc,argv);
+  }
 
-    void uPIM::startup()
-    {
-        argument_parser = upmem_sim::init_argument_parser();
-        char *argv[] = {
-            (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
-            (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
-            (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
-            (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
-            (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
-        };
-        int argc = sizeof(argv) / sizeof(argv[0]);
-        argument_parser->parse(argc, argv);
-        system = new upmem_sim::simulator::System(argument_parser);
-        system->init();
-        schedule(cpu_cycle_event, curTick() + cpu_clock);
-        schedule(rank_cycle_event, curTick() + rank_clock);
-    }
-
+  void uPIM::startup()
+  { /*
+     argument_parser = upmem_sim::init_argument_parser();
+     char *argv[] = {
+         (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
+         (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
+         (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
+         (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
+         (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
+     };
+     int argc = sizeof(argv) / sizeof(argv[0]);
+     argument_parser->parse(argc, argv);
+     system = new upmem_sim::simulator::System(argument_parser);
+     system->init();*/
+    // schedule(cpu_cycle_event, curTick() + cpu_clock);
+    schedule(rank_cycle_event, curTick() + rank_clock);
+  }
+  /*
     void uPIM::processCycle()
     {
 
-        // printf("%s: enter processCycle\n", this->name().c_str());
-        if (not system->is_finished())
+      // printf("%s: enter processCycle\n", this->name().c_str());
+      if (not system->is_finished())
+      {
+        // system->cycle();
+        // schedule(cycle_event, curTick() + dpu_cycle_);
+      }
+      else
+      {
+        printf("uPIM: system is finished\n");
+
+        system->fini();
+
+        for (auto &option : argument_parser->options())
         {
-            // system->cycle();
-            // schedule(cycle_event, curTick() + dpu_cycle_);
+          if (argument_parser->option_type(option) ==
+              upmem_sim::util::ArgumentParser::INT)
+          {
+            std::cout << option << ": " << argument_parser->get_int_parameter(option)
+                      << std::endl;
+          }
+          else if (argument_parser->option_type(option) ==
+                   upmem_sim::util::ArgumentParser::STRING)
+          {
+            std::cout << option << ": "
+                      << argument_parser->get_string_parameter(option) << std::endl;
+          }
+          else
+          {
+            throw std::invalid_argument("");
+          }
+        }
+
+        upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
+        for (auto &stat : system_stat_factory->stats())
+        {
+          std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+        }
+        delete system_stat_factory;
+
+        delete argument_parser;
+        delete system;
+      }
+    }*/
+  void uPIM::process_rank_Cycle()
+  {
+    if (system != nullptr)
+    {
+      system->dpu_check_cycle(); // just to check if the system is finished
+
+      // cpusidePort.trySendRetry();
+      if (not system->is_finished())
+      {
+        system->rank_cycle();
+        schedule(rank_cycle_event, curTick() + rank_clock);
+      }
+    }
+  }
+
+  void uPIM::process_cpu_Cycle()
+  {
+    if (not system->is_finished())
+    {
+      system->cpu_cycle();
+      schedule(cpu_cycle_event, curTick() + cpu_clock);
+    }
+
+    else
+    {
+      printf("uPIM: system is finished\n");
+
+      system->fini();
+
+      for (auto &option : argument_parser->options())
+      {
+        if (argument_parser->option_type(option) ==
+            upmem_sim::util::ArgumentParser::INT)
+        {
+          std::cout << option << ": " << argument_parser->get_int_parameter(option)
+                    << std::endl;
+        }
+        else if (argument_parser->option_type(option) ==
+                 upmem_sim::util::ArgumentParser::STRING)
+        {
+          std::cout << option << ": "
+                    << argument_parser->get_string_parameter(option) << std::endl;
         }
         else
         {
-            printf("uPIM: system is finished\n");
-
-            system->fini();
-
-            for (auto &option : argument_parser->options())
-            {
-                if (argument_parser->option_type(option) ==
-                    upmem_sim::util::ArgumentParser::INT)
-                {
-                    std::cout << option << ": " << argument_parser->get_int_parameter(option)
-                              << std::endl;
-                }
-                else if (argument_parser->option_type(option) ==
-                         upmem_sim::util::ArgumentParser::STRING)
-                {
-                    std::cout << option << ": "
-                              << argument_parser->get_string_parameter(option) << std::endl;
-                }
-                else
-                {
-                    throw std::invalid_argument("");
-                }
-            }
-
-            upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
-            for (auto &stat : system_stat_factory->stats())
-            {
-                std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-            }
-            delete system_stat_factory;
-
-            delete argument_parser;
-            delete system;
+          throw std::invalid_argument("");
         }
+      }
+
+      upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
+      for (auto &stat : system_stat_factory->stats())
+      {
+        std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+      }
+      delete system_stat_factory;
+
+      delete argument_parser;
+      delete system;
     }
-    void uPIM::process_rank_Cycle()
-    {
-        if (not system->is_finished())
-        {
-            system->rank_cycle();
-            schedule(rank_cycle_event, curTick() + rank_clock);
-        }
-    }
-    void uPIM::process_cpu_Cycle()
-    {
-        if (not system->is_finished())
-        {
-            system->cpu_cycle();
-            schedule(cpu_cycle_event, curTick() + cpu_clock);
-        }
+  }
 
+  Port &
+  uPIM::getPort(const std::string &if_name, PortID idx)
+  {
+    panic_if(idx != InvalidPortID, "This object doesn't support vector ports");
+
+    // This is the name from the Python SimObject declaration (SimpleMemobj.py)
+    if (if_name == "cpu_side")
+    {
+      return cpusidePort;
+    }
+    else
+    {
+      // pass it along to our super class
+      return SimObject::getPort(if_name, idx);
+    }
+  }
+
+  void
+  uPIM::CPUSidePort::sendPacket(PacketPtr pkt)
+  {
+    // Note: This flow control is very simple since the memobj is blocking.
+
+    panic_if(blockedPacket != nullptr, "Should never try to send if blocked!");
+
+    // If we can't send the packet across the port, store it for later.
+    if (!sendTimingResp(pkt))
+    {
+      blockedPacket = pkt;
+    }
+  }
+
+  // try: just return null list?
+  AddrRangeList
+  uPIM::CPUSidePort::getAddrRanges() const
+  {
+    return AddrRangeList();
+  }
+
+  void
+  uPIM::CPUSidePort::trySendRetry()
+  {
+    if (needRetry && blockedPacket == nullptr)
+    {
+      // Only send a retry if the port is now completely free
+      needRetry = false;
+      printf("uPIM: Sending retry req for %d\n", id);
+      // DPRINTF(SimpleMemobj, "Sending retry req for %d\n", id);
+      sendRetryReq();
+    }
+  }
+
+  void
+  uPIM::CPUSidePort::recvFunctional(PacketPtr pkt)
+  {
+    printf("uPIM: enter recvFunctional\n");
+    // Just doing nothing.
+  }
+
+  bool
+  uPIM::CPUSidePort::recvTimingReq(PacketPtr pkt)
+  {
+    // Just forward to the memobj.
+    /*    if (!owner->handleRequest(pkt))
+        {
+          needRetry = true;
+          return false;
+        }
         else
         {
-            printf("uPIM: system is finished\n");
+          return true;
+        }*/
+    needRetry = true;
+    printf("uPIM: enter recvTimingReq\n");
+    owner->system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
+    return false;
+  }
 
-            system->fini();
+  void
+  uPIM::CPUSidePort::recvRespRetry()
+  {
+    // We should have a blocked packet if this function is called.
+    assert(blockedPacket != nullptr);
 
-            for (auto &option : argument_parser->options())
-            {
-                if (argument_parser->option_type(option) ==
-                    upmem_sim::util::ArgumentParser::INT)
-                {
-                    std::cout << option << ": " << argument_parser->get_int_parameter(option)
-                              << std::endl;
-                }
-                else if (argument_parser->option_type(option) ==
-                         upmem_sim::util::ArgumentParser::STRING)
-                {
-                    std::cout << option << ": "
-                              << argument_parser->get_string_parameter(option) << std::endl;
-                }
-                else
-                {
-                    throw std::invalid_argument("");
-                }
-            }
+    // Grab the blocked packet.
+    PacketPtr pkt = blockedPacket;
+    blockedPacket = nullptr;
 
-            upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
-            for (auto &stat : system_stat_factory->stats())
-            {
-                std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-            }
-            delete system_stat_factory;
+    // Try to resend it. It's possible that it fails again.
+    sendPacket(pkt);
+  }
 
-            delete argument_parser;
-            delete system;
-        }
-    }
 } // namespace gem5

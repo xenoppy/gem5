@@ -47,6 +47,9 @@
 #include "cpu/translation.hh"
 #include "params/BaseTimingSimpleCPU.hh"
 
+#include "pim/uPIM.hh"
+#include "pim/uPIMulator_backend/src/external.hh"
+
 namespace gem5
 {
 
@@ -59,6 +62,10 @@ namespace gem5
     void init() override;
 
   private:
+    EventFunctionWrapper dpuEvent;
+    void dpuEventProcess();
+    upmem_sim::simulator::System *dpu_system;
+    upmem_sim::util::ArgumentParser *argument_parser;
     /*
      * If an access needs to be broken into fragments, currently at most two,
      * the the following two classes are used as the sender state of the
@@ -69,6 +76,9 @@ namespace gem5
      * been processed, the "outstanding" counter is decremented. Once the
      * count is zero, the entire larger access is complete.
      */
+    bool is_dpu_sent = false;
+
+    void dpuinit();
     class SplitMainSenderState : public Packet::SenderState
     {
     public:

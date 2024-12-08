@@ -40,5 +40,7 @@ class uPIM(Dpu):
     cxx_class = "gem5::uPIM"
     cpu_clock = Param.Latency("Ticks per CPU Cycle")
     rank_clock = Param.Latency("Ticks per Rank Cycle")
+
+    cpu_side = ResponsePort("CPU side port, receives requests")
     
 
