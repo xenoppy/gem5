@@ -69,64 +69,92 @@ namespace gem5
     // schedule(cpu_cycle_event, curTick() + cpu_clock);
     schedule(rank_cycle_event, curTick() + rank_clock);
   }
-  /*
-    void uPIM::processCycle()
+  // not used
+  void uPIM::processCycle()
+  {
+
+    // printf("%s: enter processCycle\n", this->name().c_str());
+    if (not system->is_finished())
     {
+      // system->cycle();
+      // schedule(cycle_event, curTick() + dpu_cycle_);
+    }
+    else
+    {
+      printf("uPIM: system is finished\n");
 
-      // printf("%s: enter processCycle\n", this->name().c_str());
-      if (not system->is_finished())
+      system->fini();
+
+      for (auto &option : argument_parser->options())
       {
-        // system->cycle();
-        // schedule(cycle_event, curTick() + dpu_cycle_);
+        if (argument_parser->option_type(option) ==
+            upmem_sim::util::ArgumentParser::INT)
+        {
+          std::cout << option << ": " << argument_parser->get_int_parameter(option)
+                    << std::endl;
+        }
+        else if (argument_parser->option_type(option) ==
+                 upmem_sim::util::ArgumentParser::STRING)
+        {
+          std::cout << option << ": "
+                    << argument_parser->get_string_parameter(option) << std::endl;
+        }
+        else
+        {
+          throw std::invalid_argument("");
+        }
       }
-      else
+
+      upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
+      for (auto &stat : system_stat_factory->stats())
       {
-        printf("uPIM: system is finished\n");
-
-        system->fini();
-
-        for (auto &option : argument_parser->options())
-        {
-          if (argument_parser->option_type(option) ==
-              upmem_sim::util::ArgumentParser::INT)
-          {
-            std::cout << option << ": " << argument_parser->get_int_parameter(option)
-                      << std::endl;
-          }
-          else if (argument_parser->option_type(option) ==
-                   upmem_sim::util::ArgumentParser::STRING)
-          {
-            std::cout << option << ": "
-                      << argument_parser->get_string_parameter(option) << std::endl;
-          }
-          else
-          {
-            throw std::invalid_argument("");
-          }
-        }
-
-        upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
-        for (auto &stat : system_stat_factory->stats())
-        {
-          std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-        }
-        delete system_stat_factory;
-
-        delete argument_parser;
-        delete system;
+        std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
       }
-    }*/
+      delete system_stat_factory;
+
+      delete argument_parser;
+      delete system;
+    }
+  }
   void uPIM::process_rank_Cycle()
   {
     if (system != nullptr)
     {
       system->dpu_check_cycle(); // just to check if the system is finished
+      if (system->is_zombie())
+      {
 
+        Request::Flags testflag(0);
+        RequestPtr req = std::make_shared<Request>(
+            0, 0, testflag, 0, 0, 0);
+        PacketPtr pkt = Packet::createRead(req);
+
+        pkt->dataDynamic<upmem_sim::simulator::System>(system);
+
+        pkt->makeTimingResponse();
+        printf("uPIM: sendTimingResp---is_zombie\n");
+        cpusidePort.sendTimingResp(pkt);
+        // send packet to cpu, then cpu check execution
+        //
+      }
       // cpusidePort.trySendRetry();
       if (not system->is_finished())
       {
         system->rank_cycle();
         schedule(rank_cycle_event, curTick() + rank_clock);
+      }
+      else
+      {
+        Request::Flags testflag(0);
+        RequestPtr req = std::make_shared<Request>(
+            0, 0, testflag, 0, 0, 0);
+        PacketPtr pkt = Packet::createRead(req);
+
+        pkt->dataDynamic<upmem_sim::simulator::System>(system);
+
+        pkt->makeTimingResponse();
+        printf("uPIM: sendTimingResp---is_finished\n");
+        cpusidePort.sendTimingResp(pkt);
       }
     }
   }
@@ -251,6 +279,10 @@ namespace gem5
     needRetry = true;
     printf("uPIM: enter recvTimingReq\n");
     owner->system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
+
+    printf("System updated\n");
+    // pkt->makeTimingResponse();
+    // sendTimingResp(pkt);
     return false;
   }
 

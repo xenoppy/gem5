@@ -26,52 +26,62 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LEARNING_GEM5_HELLO_OBJECT_HH__
-#define __LEARNING_GEM5_HELLO_OBJECT_HH__
+#ifndef __LEARNING_GEM5_GOODBYE_OBJECT_HH__
+#define __LEARNING_GEM5_GOODBYE_OBJECT_HH__
 
 #include <string>
 
-#include "learning_gem5/part2/goodbye_object.hh"
-#include "params/HelloObject.hh"
+#include "params/GoodbyeObject.hh"
 #include "sim/sim_object.hh"
 
 namespace gem5
 {
 
-class HelloObject : public SimObject
+class GoodbyeObject : public SimObject
 {
   private:
     /**
-     * Example function to execute on an event trigger
+     * Fill the buffer with the next chunk of data
      */
     void processEvent();
 
     /// An event that wraps the above function
     EventFunctionWrapper event;
 
-    /// Pointer to the corresponding GoodbyeObject. Set via Python
-    GoodbyeObject* goodbye;
+    /**
+     * Fills the buffer for one iteration. If the buffer isn't full, this
+     * function will enqueue another event to continue filling.
+     */
+    void fillBuffer();
 
-    /// The name of this object in the Python config file
-    const std::string myName;
+    /// The bytes processed per tick
+    float bandwidth;
 
-    /// Latency between calling the event (in ticks)
-    const Tick latency;
+    /// The size of the buffer we are going to fill
+    int bufferSize;
 
-    /// Number of times left to fire the event before goodbye
-    int timesLeft;
+    /// The buffer we are putting our message in
+    char *buffer;
+
+    /// The message to put into the buffer.
+    std::string message;
+
+    /// The amount of the buffer we've used so far.
+    int bufferUsed;
 
   public:
-    HelloObject(const HelloObjectParams &p);
+    GoodbyeObject(const GoodbyeObjectParams &p);
+    ~GoodbyeObject();
 
     /**
-     * Part of a SimObject's initilaization. Startup is called after all
-     * SimObjects have been constructed. It is called after the user calls
-     * simulate() for the first time.
+     * Called by an outside object. Starts off the events to fill the buffer
+     * with a goodbye message.
+     *
+     * @param name the name of the object we are saying goodbye to.
      */
-    void startup() override;
+    void sayGoodbye(std::string name);
 };
 
 } // namespace gem5
 
-#endif // __LEARNING_GEM5_HELLO_OBJECT_HH__
+#endif // __LEARNING_GEM5_GOODBYE_OBJECT_HH__

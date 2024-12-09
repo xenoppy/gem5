@@ -255,7 +255,8 @@ namespace gem5
       pkt = originalPacket;
       originalPacket = nullptr;
     } // else, pkt contains the data it needs
-    printf("\ndebug::%s\n\n", pkt->print());
+
+    printf("\ndebug::%s\n\n", pkt->print().c_str());
     sendResponse(pkt);
 
     return true;

@@ -269,11 +269,14 @@ namespace gem5
     public:
       DpuPort(TimingSimpleCPU *_cpu)
           : TimingCPUPort(_cpu->name() + ".dpu_port", _cpu),
-            tickEvent(_cpu)
+            tickEvent(_cpu),
+            owner(_cpu)
       {
       }
+      void sendSystemByTimingReq(upmem_sim::simulator::System *dpu_system);
 
     protected:
+      TimingSimpleCPU *owner;
       virtual bool recvTimingResp(PacketPtr pkt);
 
       virtual void recvReqRetry();

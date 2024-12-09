@@ -13,6 +13,7 @@ namespace upmem_sim::simulator
   public:
     explicit System(util::ArgumentParser *argument_parser);
     ~System();
+    bool is_zombie() { return rank_->is_zombie(); }
 
     util::StatFactory *stat_factory();
 
@@ -23,11 +24,10 @@ namespace upmem_sim::simulator
     void cycle();
     void cpu_cycle();
     void dpu_check_cycle();
+    void cpu_check_cycle();
     void rank_cycle();
 
   protected:
-    bool is_zombie() { return rank_->is_zombie(); }
-
   private:
     cpu::CPU *cpu_;
     rank::Rank *rank_;
