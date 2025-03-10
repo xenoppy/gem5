@@ -12,4 +12,3 @@ log_dir="/home/dongjae/pimulator/hpca_2024_log/multi_dpus_validation/${benchmark
 cmd="nohup ${sim_name} --benchmark ${benchmark} --num_tasklets 16 --bindir ${bin_dir} --logdir ${log_dir} --num_dpus ${num_dpus}"
 echo ${cmd}
 eval ${cmd}
-

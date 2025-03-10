@@ -55,7 +55,7 @@ system.clk_domain.voltage_domain = VoltageDomain()
 # Set up the system
 system.mem_mode = "timing"  # Use timing accesses
 system.mem_ranges = [AddrRange("512MB")]  # Create an address range
-system.dpu=uPIM(cpu_clock="2us",rank_clock="3us")
+system.dpu = uPIM(cpu_clock="2us", rank_clock="3us")
 # Create a simple CPU
 # You can use ISA-specific CPU models for different workloads:
 # `RiscvTimingSimpleCPU`, `ArmTimingSimpleCPU`.
@@ -94,7 +94,7 @@ thispath = os.path.dirname(os.path.realpath(__file__))
 binary = os.path.join(
     thispath,
     "../../../",
-    #"/home/weichu/my_gem5/gem5/pimtest/daxpy_O3",
+    # "/home/weichu/my_gem5/gem5/pimtest/daxpy_O3",
     "/home/weichu/my_gem5/gem5/src/pim/test/sleep",
 )
 

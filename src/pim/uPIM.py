@@ -33,7 +33,8 @@ class Dpu(SimObject):
     abstract = True
     cxx_header = "pim/uPIM.hh"
     cxx_class = "gem5::Dpu"
-   
+
+
 class uPIM(Dpu):
     type = "uPIM"
     cxx_header = "pim/uPIM.hh"
@@ -42,5 +43,3 @@ class uPIM(Dpu):
     rank_clock = Param.Latency("Ticks per Rank Cycle")
 
     cpu_side = ResponsePort("CPU side port, receives requests")
-    
-

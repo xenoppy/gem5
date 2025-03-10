@@ -45,4 +45,3 @@ for root, dirs, files in os.walk('/home/weichu/my_gem5/gem5/src/pim/uPIMulator_b
             filepath=os.path.join(root, file)
             print(filepath)
             Source(os.path.join(root, file))
-

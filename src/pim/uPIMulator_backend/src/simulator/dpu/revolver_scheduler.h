@@ -6,7 +6,7 @@
 #include "simulator/basic/queue.h"
 #include "simulator/dpu/thread.h"
 #include "util/argument_parser.h"
-#include "util/stat_factory.h" 
+#include "util/stat_factory.h"
 
 namespace upmem_sim::simulator::dpu {
 

@@ -15,4 +15,3 @@ log_path="/home/dongjae/pimulator/new_experiment_result/multi_dpus/trace/${bench
 cmd="nohup ${sim_name} --benchmark ${benchmark} --num_tasklets 16 --bindir ${bin_dir} --logdir ${log_dir} --num_dpus ${num_dpus} 1> ${log_path}/${benchmark}.16.trace &"
 echo ${cmd}
 eval ${cmd}
-

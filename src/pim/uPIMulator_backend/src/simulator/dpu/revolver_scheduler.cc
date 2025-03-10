@@ -5,7 +5,7 @@ namespace upmem_sim::simulator::dpu {
 RevolverScheduler::RevolverScheduler(util::ArgumentParser *argument_parser,
                                      std::vector<Thread *> threads)
     : thread_q_(new basic::Queue<Thread>(threads.size())),
-      stat_factory_(new util::StatFactory("RevolverScheduler")) { 
+      stat_factory_(new util::StatFactory("RevolverScheduler")) {
   num_revolver_scheduling_cycles_ = static_cast<int>(
       argument_parser->get_int_parameter("num_revolver_scheduling_cycles"));
 
@@ -26,7 +26,7 @@ RevolverScheduler::~RevolverScheduler() {
   delete stat_factory_;
 }
 
-util::StatFactory *RevolverScheduler::stat_factory() { 
+util::StatFactory *RevolverScheduler::stat_factory() {
   auto stat_factory = new util::StatFactory("");
   stat_factory->merge(stat_factory_);
   return stat_factory;
@@ -136,7 +136,7 @@ void RevolverScheduler::cycle() {
   for (auto &thread : threads_) {
     if (thread->state() == Thread::RUNNABLE and
         thread->issue_cycle() < num_revolver_scheduling_cycles_) {
-      stat_factory_->increment("revolver_wait");                 
+      stat_factory_->increment("revolver_wait");
       stat_factory_->increment(std::to_string(thread->id()) +
                                "_revolver_wait");
     }
@@ -158,7 +158,7 @@ void RevolverScheduler::cycle() {
   }
   assert(num_active_tasklets <= 16);
   stat_factory_->overwrite("current_active_tasklets",
-                           num_active_tasklets); 
+                           num_active_tasklets);
 
   stat_factory_->increment("active_tasklets_" +
                            std::to_string(num_active_tasklets));

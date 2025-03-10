@@ -71,9 +71,9 @@ void Logic::connect_dma(DMA *dma) {
 }
 
 void Logic::cycle() {
-  stat_factory_->overwrite("mram_address", -1);        
-  stat_factory_->overwrite("mram_access_thread", -1);  
-  stat_factory_->overwrite("mram_access_size", -1); 
+  stat_factory_->overwrite("mram_address", -1);
+  stat_factory_->overwrite("mram_access_thread", -1);
+  stat_factory_->overwrite("mram_access_size", -1);
 
   service_scheduler();
 
@@ -106,7 +106,7 @@ void Logic::service_scheduler() {
           std::cout << "{" << dpu_id_ << "}";
           std::cout << converter::InstructionConverter::to_string(instruction) << std::endl;
         }
-        
+
         execute_instruction(instruction);
 
         if (verbose_ >= 2) {
@@ -4971,10 +4971,10 @@ void Logic::execute_ldma(abi::instruction::Instruction *instruction) {
   dma_->transfer_from_mram_to_wram(wram_address, mram_address, size,
                                    instruction);
 
-  stat_factory_->overwrite("mram_address", mram_address); 
+  stat_factory_->overwrite("mram_address", mram_address);
   stat_factory_->overwrite("mram_access_thread",
                            instruction->thread()->id());
-  stat_factory_->overwrite("mram_access_size", size); 
+  stat_factory_->overwrite("mram_access_size", size);
 
   instruction->thread()->reg_file()->clear_conditions();
 }
@@ -5018,7 +5018,7 @@ void Logic::execute_sdma(abi::instruction::Instruction *instruction) {
   stat_factory_->overwrite("mram_address", mram_address);
   stat_factory_->overwrite("mram_access_thread",
                            instruction->thread()->id());
-  stat_factory_->overwrite("mram_access_size", size); 
+  stat_factory_->overwrite("mram_access_size", size);
 
   instruction->thread()->reg_file()->clear_conditions();
 }
