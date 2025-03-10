@@ -54,7 +54,7 @@ namespace gem5
 
   void uPIM::startup()
   {
-    argument_parser = upmem_sim::init_argument_parser();
+    /*argument_parser = upmem_sim::init_argument_parser();
     char *argv[] = {
         (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
         (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
@@ -67,6 +67,7 @@ namespace gem5
     system = new upmem_sim::simulator::System(argument_parser);
     system->init();
     // schedule(cpu_cycle_event, curTick() + cpu_clock);
+    */
     schedule(rank_cycle_event, curTick() + rank_clock);
   }
   // not used

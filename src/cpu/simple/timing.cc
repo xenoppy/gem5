@@ -73,6 +73,7 @@ namespace gem5
     printf("dpuPort: sendTimingReq\n");
     sendTimingReq(pkt);
   }
+  //@PIM
   void TimingSimpleCPU::dpuinit()
   {
 

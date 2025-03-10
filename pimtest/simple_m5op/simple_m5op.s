@@ -1,7 +1,7 @@
-	.file	"daxpy.cpp"
+	.file	"simple_m5op.cpp"
 	.text
 .Ltext0:
-	.file 0 "/home/weichu/my_gem5/gem5/pimtest" "daxpy.cpp"
+	.file 0 "/home/weichu/my_gem5/gem5/pimtest" "simple_m5op.cpp"
 	.section	.rodata
 .LC0:
 	.string	"\ntest begin"
@@ -10,7 +10,7 @@
 	.type	main, @function
 main:
 .LFB3058:
-	.file 1 "daxpy.cpp"
+	.file 1 "simple_m5op.cpp"
 	.loc 1 6 1
 	.cfi_startproc
 	endbr64
@@ -5149,7 +5149,7 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.string	"wmemcmp"
 	.section	.debug_line_str,"MS",@progbits,1
 .LASF0:
-	.string	"daxpy.cpp"
+	.string	"simple_m5op.cpp"
 .LASF1:
 	.string	"/home/weichu/my_gem5/gem5/pimtest"
 	.ident	"GCC: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0"

@@ -55,6 +55,7 @@ system.clk_domain.voltage_domain = VoltageDomain()
 # Set up the system
 system.mem_mode = "timing"  # Use timing accesses
 system.mem_ranges = [AddrRange("512MB")]  # Create an address range
+# @PIM
 system.dpu = uPIM(cpu_clock="2us", rank_clock="3us")
 # Create a simple CPU
 # You can use ISA-specific CPU models for different workloads:
@@ -67,7 +68,6 @@ system.membus = SystemXBar()
 # Hook the CPU ports up to the membus
 system.cpu.icache_port = system.membus.cpu_side_ports
 system.cpu.dcache_port = system.membus.cpu_side_ports
-system.cpu.dpu_port = system.dpu.cpu_side
 
 # create the interrupt controller for the CPU and connect to the membus
 system.cpu.createInterruptController()
@@ -92,9 +92,11 @@ system.system_port = system.membus.cpu_side_ports
 # workloads compiled to those ISAs. Other "hello world" binaries for other ISAs
 # can be found in "tests/test-progs/hello".
 thispath = os.path.dirname(os.path.realpath(__file__))
+# @PIM
 binary = os.path.join(
     thispath,
     "../../../",
+    # "/home/weichu/my_gem5/gem5/pimtest/daxpy_O3",
     "/home/weichu/my_gem5/gem5/src/pim/test/sleep",
 )
 

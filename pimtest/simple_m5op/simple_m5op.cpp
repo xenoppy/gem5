@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <random>
+
 #include "../include/gem5/m5ops.h"
 
 int main()
