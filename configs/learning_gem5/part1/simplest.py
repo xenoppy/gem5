@@ -94,6 +94,7 @@ thispath = os.path.dirname(os.path.realpath(__file__))
 binary = os.path.join(
     thispath,
     "../../../",
+    #"/home/weichu/my_gem5/gem5/pimtest/daxpy_O3",
     "/home/weichu/my_gem5/gem5/src/pim/test/sleep",
 )
 
