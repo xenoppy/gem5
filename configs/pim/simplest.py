@@ -96,8 +96,8 @@ thispath = os.path.dirname(os.path.realpath(__file__))
 binary = os.path.join(
     thispath,
     "../../../",
-    # "/home/weichu/my_gem5/gem5/pimtest/daxpy_O3",
-    "/home/weichu/my_gem5/gem5/src/pim/test/sleep",
+    # "/home/weichu/my_gem5/gem5/pimtest/simple_m5op/simple_m5op.out",
+    "/home/weichu/my_gem5/gem5/pimtest/sleep/sleep.out",
 )
 
 system.workload = SEWorkload.init_compatible(binary)

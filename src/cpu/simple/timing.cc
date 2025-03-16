@@ -92,6 +92,7 @@ namespace gem5
     dpu_system->init();
     dpuPort.sendSystemByTimingReq(dpu_system);
   }
+  //@PIM
   void
   TimingSimpleCPU::init()
   {
