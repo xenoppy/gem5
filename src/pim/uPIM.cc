@@ -158,6 +158,10 @@ namespace gem5
         cpusidePort.sendTimingResp(pkt);
       }
     }
+    else
+    {
+      schedule(rank_cycle_event, curTick() + rank_clock);
+    }
   }
 
   void uPIM::process_cpu_Cycle()

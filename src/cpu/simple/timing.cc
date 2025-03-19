@@ -61,7 +61,9 @@
 namespace gem5
 {
 
-  void TimingSimpleCPU::DpuPort::sendSystemByTimingReq(upmem_sim::simulator::System *dpu_system)
+  //@PIM
+  void TimingSimpleCPU::DpuPort::sendSystemByTimingReq
+            (upmem_sim::simulator::System *dpu_system)
   {
     Request::Flags testflag(0);
     RequestPtr req = std::make_shared<Request>(
