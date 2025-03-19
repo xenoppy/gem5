@@ -180,9 +180,10 @@ namespace gem5
      * @return a reference to the instruction port
      */
     virtual Port &getInstPort() = 0;
-
+    //@PIM
     virtual Port &getDpuPort() { return *static_cast<Port *>(nullptr); }
-
+    //@PIM
+    virtual void send_message_to_dpu(PacketPtr data) {return;}
     /** Reads this CPU's ID. */
     int cpuId() const { return _cpuId; }
 

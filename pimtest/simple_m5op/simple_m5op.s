@@ -1,8 +1,8 @@
 	.file	"simple_m5op.cpp"
 	.text
 .Ltext0:
-	.file 0 "/home/weichu/my_gem5/gem5/pimtest" "simple_m5op.cpp"
-	.section	.rodata
+        .file 0 "/home/weichu/my_gem5/gem5/pimtest/simple_m5op" "simple_m5op.cpp"
+        .section	.rodata
 .LC0:
 	.string	"\ntest begin"
 	.text
@@ -11,27 +11,40 @@
 main:
 .LFB3058:
 	.file 1 "simple_m5op.cpp"
-	.loc 1 6 1
-	.cfi_startproc
+        .loc 1 7 1
+        .cfi_startproc
 	endbr64
 	pushq	%rbp
 	.cfi_def_cfa_offset 16
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	.loc 1 7 9
-	leaq	.LC0(%rip), %rax
+        subq	$16, %rsp
+        .loc 1 8 9
+        leaq	.LC0(%rip), %rax
 	movq	%rax, %rdi
 	call	puts@PLT
-	.loc 1 8 15
-	call	m5_reserved1@PLT
-	.loc 1 9 10
-	movl	$0, %eax
-	.loc 1 10 1
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
-	.cfi_endproc
+        .loc 1 9 15
+        call	m5_reserved1@PLT
+        .loc 1 10 7
+        movl	$0, -12(%rbp)
+        .loc 1 10 14
+        movl	$2, -8(%rbp)
+.L2:
+.LBB2:
+        .loc 1 13 9
+        movl	$2, -4(%rbp)
+        .loc 1 14 7
+        movl	-4(%rbp), %eax
+        addl	%eax, -12(%rbp)
+        .loc 1 15 7 discriminator 1
+        movl	-8(%rbp), %eax
+        subl	%eax, -12(%rbp)
+.LBE2:
+        .loc 1 16 3
+        nop
+        jmp	.L2
+        .cfi_endproc
 .LFE3058:
 	.size	main, .-main
 	.section	.rodata
@@ -82,16 +95,16 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.file 32 "/usr/include/stdint.h"
 	.file 33 "/usr/include/c++/13/pstl/execution_defs.h"
 	.file 34 "/usr/include/c++/13/bits/memory_resource.h"
-	.file 35 "../include/gem5/m5ops.h"
-	.section	.debug_info,"",@progbits
+        .file 35 "/home/weichu/my_gem5/gem5/include/../include/gem5/m5ops.h"
+        .section	.debug_info,"",@progbits
 .Ldebug_info0:
-	.long	0x1ca2
-	.value	0x5
+        .long	0x1cd9
+        .value	0x5
 	.byte	0x1
 	.byte	0x8
 	.long	.Ldebug_abbrev0
-	.uleb128 0x20
-	.long	.LASF302
+        .uleb128 0x21
+        .long	.LASF302
 	.byte	0x21
 	.long	.LASF0
 	.long	.LASF1
@@ -108,8 +121,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x8
 	.byte	0x7
 	.long	.LASF6
-	.uleb128 0x21
-	.long	.LASF303
+        .uleb128 0x22
+        .long	.LASF303
 	.byte	0x18
 	.byte	0x2
 	.byte	0
@@ -135,8 +148,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x4
 	.byte	0x7
 	.long	.LASF7
-	.uleb128 0x22
-	.byte	0x8
+        .uleb128 0x23
+        .byte	0x8
 	.uleb128 0x8
 	.byte	0x1
 	.byte	0x8
@@ -183,8 +196,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x29
 	.byte	0x14
 	.long	0xd7
-	.uleb128 0x23
-	.byte	0x4
+        .uleb128 0x24
+        .byte	0x4
 	.byte	0x5
 	.string	"int"
 	.uleb128 0x3
@@ -296,19 +309,19 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x1
 	.long	.LASF124
 	.long	0x1f2
-	.uleb128 0x24
-	.byte	0x4
+        .uleb128 0x25
+        .byte	0x4
 	.byte	0x5
 	.byte	0x11
 	.byte	0x3
 	.long	0x1d7
-	.uleb128 0x19
-	.long	.LASF35
+        .uleb128 0x1a
+        .long	.LASF35
 	.byte	0x12
 	.byte	0x13
 	.long	0x76
-	.uleb128 0x19
-	.long	.LASF36
+        .uleb128 0x1a
+        .long	.LASF36
 	.byte	0x13
 	.byte	0xa
 	.long	0x1f2
@@ -592,8 +605,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x7
 	.byte	0x19
 	.long	0x24e
-	.uleb128 0x25
-	.long	.LASF304
+        .uleb128 0x26
+        .long	.LASF304
 	.byte	0x8
 	.byte	0x2b
 	.byte	0xe
@@ -639,8 +652,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.long	0x436
 	.uleb128 0x6
 	.long	0x3d5
-	.uleb128 0x26
-	.string	"std"
+        .uleb128 0x27
+        .string	"std"
 	.byte	0x19
 	.value	0x132
 	.byte	0xb
@@ -790,14 +803,14 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.value	0x75a
 	.byte	0xb
 	.long	0xd0d
-	.uleb128 0x1a
-	.long	.LASF80
+        .uleb128 0x1b
+        .long	.LASF80
 	.value	0xab0
-	.uleb128 0x1a
-	.long	.LASF81
+        .uleb128 0x1b
+        .long	.LASF81
 	.value	0xb06
-	.uleb128 0x1b
-	.long	.LASF82
+        .uleb128 0x1c
+        .long	.LASF82
 	.byte	0xe
 	.byte	0x32
 	.byte	0xd
@@ -1341,8 +1354,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x37
 	.byte	0xb
 	.long	0x1ae9
-	.uleb128 0x27
-	.long	.LASF301
+        .uleb128 0x28
+        .long	.LASF301
 	.byte	0x19
 	.value	0x155
 	.byte	0x41
@@ -1351,8 +1364,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x3a
 	.byte	0xb
 	.long	0x1b26
-	.uleb128 0x28
-	.string	"pmr"
+        .uleb128 0x29
+        .string	"pmr"
 	.byte	0x22
 	.byte	0x35
 	.byte	0xb
@@ -1496,8 +1509,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x55
 	.byte	0xb
 	.long	0x1c30
-	.uleb128 0x1c
-	.long	.LASF299
+        .uleb128 0x1d
+        .long	.LASF299
 	.byte	0xd
 	.byte	0x91
 	.byte	0xd
@@ -1758,8 +1771,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x1
 	.long	0x2e
 	.byte	0
-	.uleb128 0x1d
-	.long	.LASF106
+        .uleb128 0x1e
+        .long	.LASF106
 	.byte	0xa
 	.byte	0xc2
 	.byte	0xe
@@ -1792,14 +1805,14 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.long	.LASF109
 	.uleb128 0xc
 	.long	0xc57
-	.uleb128 0x29
-	.long	.LASF110
+        .uleb128 0x2a
+        .long	.LASF110
 	.byte	0x19
 	.value	0x157
 	.byte	0xb
 	.long	0xcea
-	.uleb128 0x1b
-	.long	.LASF111
+        .uleb128 0x1c
+        .long	.LASF111
 	.byte	0x15
 	.byte	0x25
 	.byte	0xb
@@ -1838,8 +1851,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0xec
 	.byte	0xb
 	.long	0x1179
-	.uleb128 0x2a
-	.string	"div"
+        .uleb128 0x2b
+        .string	"div"
 	.byte	0xf
 	.byte	0xd9
 	.byte	0x3
@@ -2024,16 +2037,16 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x1b
 	.byte	0x13
 	.long	0xea
-	.uleb128 0x2b
-	.long	.LASF136
+        .uleb128 0x2c
+        .long	.LASF136
 	.byte	0x17
 	.value	0x3b4
 	.byte	0xf
 	.long	0xe1e
 	.uleb128 0x6
 	.long	0xe23
-	.uleb128 0x2c
-	.long	0xd7
+        .uleb128 0x2d
+        .long	0xd7
 	.long	0xe37
 	.uleb128 0x1
 	.long	0xe37
@@ -2042,8 +2055,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0
 	.uleb128 0x6
 	.long	0xe3c
-	.uleb128 0x2d
-	.uleb128 0x8
+        .uleb128 0x2e
+        .uleb128 0x8
 	.byte	0x10
 	.byte	0x7
 	.long	.LASF137
@@ -2065,13 +2078,13 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x4
 	.byte	0x10
 	.long	.LASF141
-	.uleb128 0x1e
-	.long	.LASF142
+        .uleb128 0x1f
+        .long	.LASF142
 	.byte	0xe
 	.byte	0x38
 	.long	0xe79
-	.uleb128 0x2e
-	.byte	0xe
+        .uleb128 0x2f
+        .byte	0xe
 	.byte	0x3a
 	.byte	0x18
 	.long	0x551
@@ -2088,8 +2101,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0
 	.uleb128 0x6
 	.long	0xe95
-	.uleb128 0x2f
-	.uleb128 0xa
+        .uleb128 0x30
+        .uleb128 0xa
 	.long	.LASF144
 	.byte	0x17
 	.value	0x2e3
@@ -2148,8 +2161,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x1
 	.long	0xe11
 	.byte	0
-	.uleb128 0x30
-	.string	"div"
+        .uleb128 0x31
+        .string	"div"
 	.byte	0x17
 	.value	0x3e0
 	.byte	0xe
@@ -2238,8 +2251,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x1
 	.long	0xe11
 	.byte	0
-	.uleb128 0x31
-	.long	.LASF155
+        .uleb128 0x32
+        .long	.LASF155
 	.byte	0x17
 	.value	0x2fa
 	.byte	0xd
@@ -2852,8 +2865,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0
 	.uleb128 0x6
 	.long	0x1589
-	.uleb128 0x32
-	.string	"tm"
+        .uleb128 0x33
+        .string	"tm"
 	.uleb128 0xc
 	.long	0x1585
 	.uleb128 0x7
@@ -3475,39 +3488,39 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x1
 	.long	0x431
 	.byte	0
-	.uleb128 0x1d
-	.long	.LASF271
+        .uleb128 0x1e
+        .long	.LASF271
 	.byte	0x1d
 	.byte	0x7d
 	.byte	0x16
 	.long	0x1af5
 	.uleb128 0x6
 	.long	0x1988
-	.uleb128 0x33
-	.byte	0x20
+        .uleb128 0x34
+        .byte	0x20
 	.byte	0x10
 	.byte	0x3
 	.value	0x1a9
 	.byte	0x10
 	.long	.LASF306
 	.long	0x1b26
-	.uleb128 0x1f
-	.long	.LASF272
+        .uleb128 0x20
+        .long	.LASF272
 	.value	0x1aa
 	.byte	0xd
 	.long	0xcf1
 	.byte	0x8
 	.byte	0
-	.uleb128 0x1f
-	.long	.LASF273
+        .uleb128 0x20
+        .long	.LASF273
 	.value	0x1ab
 	.byte	0xf
 	.long	0xcf8
 	.byte	0x10
 	.byte	0x10
 	.byte	0
-	.uleb128 0x34
-	.long	.LASF307
+        .uleb128 0x35
+        .long	.LASF307
 	.byte	0x3
 	.value	0x1b4
 	.byte	0x3
@@ -3657,18 +3670,18 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x5b
 	.byte	0x16
 	.long	0x175
-	.uleb128 0x1e
-	.long	.LASF298
+        .uleb128 0x1f
+        .long	.LASF298
 	.byte	0x21
 	.byte	0xf
 	.long	0x1c70
-	.uleb128 0x1c
-	.long	.LASF300
+        .uleb128 0x1d
+        .long	.LASF300
 	.byte	0x21
 	.byte	0x11
 	.byte	0xb
-	.uleb128 0x35
-	.string	"v1"
+        .uleb128 0x36
+        .string	"v1"
 	.byte	0x21
 	.byte	0x13
 	.byte	0x12
@@ -3680,22 +3693,51 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.long	0x9ce
 	.uleb128 0x18
 	.long	0x9d7
-	.uleb128 0x36
-	.long	.LASF308
+        .uleb128 0x37
+        .long	.LASF308
 	.byte	0x23
 	.byte	0x50
 	.byte	0x8
-	.uleb128 0x37
-	.long	.LASF309
+        .uleb128 0x38
+        .long	.LASF309
 	.byte	0x1
-	.byte	0x5
-	.byte	0x5
+        .byte	0x6
+        .byte	0x5
 	.long	0xd7
 	.quad	.LFB3058
 	.quad	.LFE3058-.LFB3058
 	.uleb128 0x1
 	.byte	0x9c
-	.byte	0
+        .uleb128 0x19
+        .string	"b"
+        .byte	0xa
+        .byte	0x7
+        .long	0xd7
+        .uleb128 0x2
+        .byte	0x91
+        .sleb128 -28
+        .uleb128 0x19
+        .string	"c"
+        .byte	0xa
+        .byte	0xe
+        .long	0xd7
+        .uleb128 0x2
+        .byte	0x91
+        .sleb128 -24
+        .uleb128 0x39
+        .quad	.LBB2
+        .quad	.LBE2-.LBB2
+        .uleb128 0x19
+        .string	"a"
+        .byte	0xd
+        .byte	0x9
+        .long	0xd7
+        .uleb128 0x2
+        .byte	0x91
+        .sleb128 -20
+        .byte	0
+        .byte	0
+        .byte	0
 	.section	.debug_abbrev,"",@progbits
 .Ldebug_abbrev0:
 	.uleb128 0x1
@@ -4052,7 +4094,25 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0
 	.byte	0
 	.uleb128 0x19
-	.uleb128 0xd
+        .uleb128 0x34
+        .byte	0
+        .uleb128 0x3
+        .uleb128 0x8
+        .uleb128 0x3a
+        .uleb128 0x21
+        .sleb128 1
+        .uleb128 0x3b
+        .uleb128 0xb
+        .uleb128 0x39
+        .uleb128 0xb
+        .uleb128 0x49
+        .uleb128 0x13
+        .uleb128 0x2
+        .uleb128 0x18
+        .byte	0
+        .byte	0
+        .uleb128 0x1a
+        .uleb128 0xd
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4067,8 +4127,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x1a
-	.uleb128 0x39
+        .uleb128 0x1b
+        .uleb128 0x39
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4082,8 +4142,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.sleb128 13
 	.byte	0
 	.byte	0
-	.uleb128 0x1b
-	.uleb128 0x39
+        .uleb128 0x1c
+        .uleb128 0x39
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4095,8 +4155,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x1c
-	.uleb128 0x39
+        .uleb128 0x1d
+        .uleb128 0x39
 	.byte	0x1
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4108,8 +4168,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x1d
-	.uleb128 0x2e
+        .uleb128 0x1e
+        .uleb128 0x2e
 	.byte	0
 	.uleb128 0x3f
 	.uleb128 0x19
@@ -4127,8 +4187,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x19
 	.byte	0
 	.byte	0
-	.uleb128 0x1e
-	.uleb128 0x39
+        .uleb128 0x1f
+        .uleb128 0x39
 	.byte	0x1
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4143,8 +4203,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x1f
-	.uleb128 0xd
+        .uleb128 0x20
+        .uleb128 0xd
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4163,8 +4223,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x20
-	.uleb128 0x11
+        .uleb128 0x21
+        .uleb128 0x11
 	.byte	0x1
 	.uleb128 0x25
 	.uleb128 0xe
@@ -4182,8 +4242,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x17
 	.byte	0
 	.byte	0
-	.uleb128 0x21
-	.uleb128 0x13
+        .uleb128 0x22
+        .uleb128 0x13
 	.byte	0x1
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4197,15 +4257,15 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x22
-	.uleb128 0xf
+        .uleb128 0x23
+        .uleb128 0xf
 	.byte	0
 	.uleb128 0xb
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x23
-	.uleb128 0x24
+        .uleb128 0x24
+        .uleb128 0x24
 	.byte	0
 	.uleb128 0xb
 	.uleb128 0xb
@@ -4215,8 +4275,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x8
 	.byte	0
 	.byte	0
-	.uleb128 0x24
-	.uleb128 0x17
+        .uleb128 0x25
+        .uleb128 0x17
 	.byte	0x1
 	.uleb128 0xb
 	.uleb128 0xb
@@ -4230,8 +4290,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x25
-	.uleb128 0x16
+        .uleb128 0x26
+        .uleb128 0x16
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4243,8 +4303,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x26
-	.uleb128 0x39
+        .uleb128 0x27
+        .uleb128 0x39
 	.byte	0x1
 	.uleb128 0x3
 	.uleb128 0x8
@@ -4258,8 +4318,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x27
-	.uleb128 0x39
+        .uleb128 0x28
+        .uleb128 0x39
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4273,8 +4333,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x19
 	.byte	0
 	.byte	0
-	.uleb128 0x28
-	.uleb128 0x39
+        .uleb128 0x29
+        .uleb128 0x39
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0x8
@@ -4286,8 +4346,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x29
-	.uleb128 0x39
+        .uleb128 0x2a
+        .uleb128 0x39
 	.byte	0x1
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4301,8 +4361,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x2a
-	.uleb128 0x2e
+        .uleb128 0x2b
+        .uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
 	.uleb128 0x19
@@ -4324,8 +4384,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x2b
-	.uleb128 0x16
+        .uleb128 0x2c
+        .uleb128 0x16
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4339,8 +4399,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x2c
-	.uleb128 0x15
+        .uleb128 0x2d
+        .uleb128 0x15
 	.byte	0x1
 	.uleb128 0x49
 	.uleb128 0x13
@@ -4348,13 +4408,13 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x2d
-	.uleb128 0x26
+        .uleb128 0x2e
+        .uleb128 0x26
 	.byte	0
 	.byte	0
 	.byte	0
-	.uleb128 0x2e
-	.uleb128 0x3a
+        .uleb128 0x2f
+        .uleb128 0x3a
 	.byte	0
 	.uleb128 0x3a
 	.uleb128 0xb
@@ -4366,13 +4426,13 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x2f
-	.uleb128 0x15
+        .uleb128 0x30
+        .uleb128 0x15
 	.byte	0
 	.byte	0
 	.byte	0
-	.uleb128 0x30
-	.uleb128 0x2e
+        .uleb128 0x31
+        .uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
 	.uleb128 0x19
@@ -4392,8 +4452,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x31
-	.uleb128 0x2e
+        .uleb128 0x32
+        .uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
 	.uleb128 0x19
@@ -4413,8 +4473,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x32
-	.uleb128 0x13
+        .uleb128 0x33
+        .uleb128 0x13
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0x8
@@ -4422,8 +4482,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x19
 	.byte	0
 	.byte	0
-	.uleb128 0x33
-	.uleb128 0x13
+        .uleb128 0x34
+        .uleb128 0x13
 	.byte	0x1
 	.uleb128 0xb
 	.uleb128 0xb
@@ -4441,8 +4501,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x34
-	.uleb128 0x16
+        .uleb128 0x35
+        .uleb128 0x16
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4458,8 +4518,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0xb
 	.byte	0
 	.byte	0
-	.uleb128 0x35
-	.uleb128 0x39
+        .uleb128 0x36
+        .uleb128 0x39
 	.byte	0
 	.uleb128 0x3
 	.uleb128 0x8
@@ -4473,8 +4533,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x19
 	.byte	0
 	.byte	0
-	.uleb128 0x36
-	.uleb128 0x2e
+        .uleb128 0x37
+        .uleb128 0x2e
 	.byte	0
 	.uleb128 0x3f
 	.uleb128 0x19
@@ -4490,10 +4550,10 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x19
 	.byte	0
 	.byte	0
-	.uleb128 0x37
-	.uleb128 0x2e
-	.byte	0
-	.uleb128 0x3f
+        .uleb128 0x38
+        .uleb128 0x2e
+        .byte	0x1
+        .uleb128 0x3f
 	.uleb128 0x19
 	.uleb128 0x3
 	.uleb128 0xe
@@ -4513,7 +4573,16 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x18
 	.uleb128 0x7c
 	.uleb128 0x19
-	.byte	0
+        .byte	0
+        .byte	0
+        .uleb128 0x39
+        .uleb128 0xb
+        .byte	0x1
+        .uleb128 0x11
+        .uleb128 0x1
+        .uleb128 0x12
+        .uleb128 0x7
+        .byte	0
 	.byte	0
 	.byte	0
 	.section	.debug_aranges,"",@progbits
@@ -4595,10 +4664,6 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.string	"__gnu_cxx"
 .LASF70:
 	.string	"_freeres_list"
-.LASF46:
-	.string	"_flags"
-.LASF296:
-	.string	"intmax_t"
 .LASF293:
 	.string	"uint_fast64_t"
 .LASF287:
@@ -4643,6 +4708,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.string	"n_sep_by_space"
 .LASF130:
 	.string	"7lldiv_t"
+.LASF46:
+        .string	"_flags"
 .LASF271:
 	.string	"localeconv"
 .LASF289:
@@ -4809,6 +4876,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.string	"rename"
 .LASF40:
 	.string	"__pos"
+.LASF296:
+        .string	"intmax_t"
 .LASF184:
 	.string	"__isoc23_fwscanf"
 .LASF169:
@@ -5151,8 +5220,8 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 .LASF0:
 	.string	"simple_m5op.cpp"
 .LASF1:
-	.string	"/home/weichu/my_gem5/gem5/pimtest"
-	.ident	"GCC: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0"
+        .string	"/home/weichu/my_gem5/gem5/pimtest/simple_m5op"
+        .ident	"GCC: (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 8

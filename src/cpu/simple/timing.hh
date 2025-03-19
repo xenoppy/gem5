@@ -273,7 +273,11 @@ namespace gem5
             owner(_cpu)
       {
       }
-      void sendSystemByTimingReq(upmem_sim::simulator::System *dpu_system);
+      void send_packet_by_TimingReq(PacketPtr pkt)
+      {
+        printf("dpuPort: sendTimingReq\n");
+        sendTimingReq(pkt);
+      }
 
     protected:
       TimingSimpleCPU *owner;
@@ -315,6 +319,15 @@ namespace gem5
     {
       return dpuPort;
     };
+    //@PIM
+    void send_message_to_dpu(PacketPtr data) override
+    {
+      if (dpuPort.isConnected())
+        dpuPort.send_packet_by_TimingReq(data);
+      else
+        printf("dpuPort is not connected\n");
+      return;
+    }
 
   public:
     DrainState drain() override;

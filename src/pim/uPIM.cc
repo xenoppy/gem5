@@ -121,6 +121,7 @@ namespace gem5
   {
     if (system != nullptr)
     {
+      printf("uPIM: system has initialized, starting rank cycle\n");
       system->dpu_check_cycle(); // just to check if the system is finished
       if (system->is_zombie())
       {
@@ -160,6 +161,7 @@ namespace gem5
     }
     else
     {
+      printf("uPIM: system is not initialized\n");
       schedule(rank_cycle_event, curTick() + rank_clock);
     }
   }

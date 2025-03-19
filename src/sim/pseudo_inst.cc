@@ -71,6 +71,10 @@
 #include "sim/stats.hh"
 #include "sim/system.hh"
 
+//@PIM
+#include "pim/uPIM.hh"
+#include "pim/uPIMulator_backend/src/external.hh"
+
 namespace gem5
 {
 
@@ -628,7 +632,28 @@ namespace gem5
     //@PIM
     void PIMtest(ThreadContext *tc)
     {
-      printf("PIMtest\n");
+      printf("pseudo_inst::PIMtest()\n");
+      upmem_sim::util::ArgumentParser * argument_parser = upmem_sim::init_argument_parser();
+      char *argv[] = {
+          (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
+          (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
+          (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
+          (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
+          (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
+      };
+      int argc = sizeof(argv) / sizeof(argv[0]);
+      argument_parser->parse(argc, argv);
+
+      upmem_sim::simulator::System * dpu_system = new upmem_sim::simulator::System(argument_parser);
+      dpu_system->init();
+
+      Request::Flags testflag(0);
+      RequestPtr req = std::make_shared<Request>(
+          0, 0, testflag, 0, 0, 0);
+      PacketPtr pkt = Packet::createRead(req);
+      pkt->dataDynamic<upmem_sim::simulator::System>(dpu_system);
+      tc->getCpuPtr()->send_message_to_dpu(pkt);
+      printf("pseudo to send message to dpu done.\n");
     }
 
   } // namespace pseudo_inst

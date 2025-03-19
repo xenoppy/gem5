@@ -61,20 +61,19 @@
 namespace gem5
 {
 
-  //@PIM
-  void TimingSimpleCPU::DpuPort::sendSystemByTimingReq
-            (upmem_sim::simulator::System *dpu_system)
-  {
-    Request::Flags testflag(0);
-    RequestPtr req = std::make_shared<Request>(
-        0, 0, testflag, 0, 0, 0);
-    PacketPtr pkt = Packet::createRead(req);
+  // //@PIM
+  // void TimingSimpleCPU::DpuPort::send_data_by_TimingReq
+  //           (upmem_sim::simulator::System *dpu_system)
+  // {
+  //   Request::Flags testflag(0);
+  //   RequestPtr req = std::make_shared<Request>(
+  //       0, 0, testflag, 0, 0, 0);
+  //   PacketPtr pkt = Packet::createRead(req);
 
-    pkt->dataDynamic<upmem_sim::simulator::System>(dpu_system);
+  //   pkt->dataDynamic<upmem_sim::simulator::System>(dpu_system);
 
-    printf("dpuPort: sendTimingReq\n");
-    sendTimingReq(pkt);
-  }
+  //   sendTimingReq(pkt);
+  // }
   //@PIM
   void TimingSimpleCPU::dpuinit()
   {
@@ -92,7 +91,7 @@ namespace gem5
 
     dpu_system = new upmem_sim::simulator::System(argument_parser);
     dpu_system->init();
-    dpuPort.sendSystemByTimingReq(dpu_system);
+    // dpuPort.sendSystemByTimingReq(dpu_system);
   }
   //@PIM
   void
@@ -101,7 +100,7 @@ namespace gem5
     if (dpuPort.isConnected())
     {
 
-      dpuinit();
+      //dpuinit();
     }
     // previous one
     BaseSimpleCPU::init();
@@ -1322,41 +1321,41 @@ namespace gem5
   bool TimingSimpleCPU::DpuPort::recvTimingResp(PacketPtr pkt)
   {
     printf("DpuPort: recvTimingResp---system updated\n");
-    owner->dpu_system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
-    if (not owner->dpu_system->is_finished())
-    {
-      owner->dpu_system->cpu_check_cycle();
-      sendSystemByTimingReq(owner->dpu_system);
-    }
-    else
-    {
-      owner->dpu_system->fini();
+    // owner->dpu_system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
+    // if (not owner->dpu_system->is_finished())
+    // {
+    //   owner->dpu_system->cpu_check_cycle();
+    //   sendSystemByTimingReq(owner->dpu_system);
+    // }
+    // else
+    // {
+    //   owner->dpu_system->fini();
 
-      for (auto &option : owner->argument_parser->options())
-      {
-        if (owner->argument_parser->option_type(option) ==
-            upmem_sim::util::ArgumentParser::INT)
-        {
-          std::cout << option << ": " << owner->argument_parser->get_int_parameter(option)
-                    << std::endl;
-        }
-        else if (owner->argument_parser->option_type(option) ==
-                 upmem_sim::util::ArgumentParser::STRING)
-        {
-          std::cout << option << ": "
-                    << owner->argument_parser->get_string_parameter(option) << std::endl;
-        }
-        else
-        {
-          throw std::invalid_argument("");
-        }
-      }
-      upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
-      for (auto &stat : system_stat_factory->stats())
-      {
-        std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-      }
-    }
+    //   for (auto &option : owner->argument_parser->options())
+    //   {
+    //     if (owner->argument_parser->option_type(option) ==
+    //         upmem_sim::util::ArgumentParser::INT)
+    //     {
+    //       std::cout << option << ": " << owner->argument_parser->get_int_parameter(option)
+    //                 << std::endl;
+    //     }
+    //     else if (owner->argument_parser->option_type(option) ==
+    //              upmem_sim::util::ArgumentParser::STRING)
+    //     {
+    //       std::cout << option << ": "
+    //                 << owner->argument_parser->get_string_parameter(option) << std::endl;
+    //     }
+    //     else
+    //     {
+    //       throw std::invalid_argument("");
+    //     }
+    //   }
+    //   upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
+    //   for (auto &stat : system_stat_factory->stats())
+    //   {
+    //     std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+    //   }
+    // }
     return false;
   }
 
