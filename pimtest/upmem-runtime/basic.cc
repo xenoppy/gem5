@@ -1,4 +1,5 @@
 #include "basic.hh"
+#include "../include/gem5/m5ops.h"
 
 void dpuload()
 {
