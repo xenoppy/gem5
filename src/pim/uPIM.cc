@@ -294,23 +294,23 @@ namespace gem5
     switch (msg->type){
       case upmem_sim::DPU_INIT:
         {
-          upmem_sim::init_argument *arg = std::any_cast<upmem_sim::init_argument *>(msg->data);
-          printf("uPIM: DPU_INIT\n");
-          char **argv = arg->argv;
-          int argc = arg->argc;
-          upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
-          argument_parser->parse(argc, argv);
-          owner->system = new upmem_sim::simulator::System(argument_parser);
-          //owner->system->init();
-          printf("uPIM: DPU_INIT done\n");
+          // upmem_sim::init_argument *arg = std::any_cast<upmem_sim::init_argument *>(msg->data);
+          // printf("uPIM: DPU_INIT\n");
+          // char **argv = arg->argv;
+          // int argc = arg->argc;
+          // upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
+          // argument_parser->parse(argc, argv);
+          // owner->system = new upmem_sim::simulator::System(argument_parser);
+          // //owner->system->init();
+          // printf("uPIM: DPU_INIT done\n");
           break;
         }
       case upmem_sim::DPU_DOORBELL:
         {
-          owner->SQ_tail = std::any_cast<upmem_sim::Doorbells *>(msg->data)->sq_tail;
-          owner->CQ_head = std::any_cast<upmem_sim::Doorbells *>(msg->data)->cq_head;
+          // owner->SQ_tail = std::any_cast<upmem_sim::Doorbells *>(msg->data)->sq_tail;
+          // owner->CQ_head = std::any_cast<upmem_sim::Doorbells *>(msg->data)->cq_head;
 
-          printf("uPIM: DPU_DOORBELL done\n");
+          // printf("uPIM: DPU_DOORBELL done\n");
           break;
         }
     }

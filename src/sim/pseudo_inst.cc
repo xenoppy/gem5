@@ -633,9 +633,7 @@ namespace gem5
     //@PIM
     void PIMtest(ThreadContext *tc, GuestAddr data)
     {
-      DPRINTF(PseudoInst, "pseudo_inst::PIMtest()\n");
-
-
+      printf("pseudo_inst::PIMtest()\n");
       gem5::Request::Flags testflag(0);
       gem5::RequestPtr req = std::make_shared<gem5::Request>(
           0, 0, testflag, 0, 0, 0);
@@ -646,8 +644,33 @@ namespace gem5
 
       upmem_sim::Dpu_message* msg=(upmem_sim::Dpu_message*)malloc(sizeof(upmem_sim::Dpu_message));
       virt_proxy.readBlob(data.addr, msg, sizeof(upmem_sim::Dpu_message));
-      //打印data和data.addr指针地址
+      std::vector<void*> datas;
+
       printf("data: %ld, data.addr: %ld, msg: %ld\n",(long int)&data,data.addr,(long int)msg);
+      std::cout<<"msg type: "<<msg->type<<std::endl;
+      std::cout<<"data_count: "<<msg->data_count<<std::endl;
+      upmem_sim::message_data** data_ptrs = (upmem_sim::message_data**)malloc(msg->data_count * sizeof(upmem_sim::message_data*));
+      std::cout<<"data_ptrs address: "<<msg->data_ptrs<<std::endl;
+      virt_proxy.readBlob((Addr)(msg->data_ptrs), data_ptrs, sizeof(upmem_sim::message_data*)* msg->data_count);
+
+      for(size_t i=0;i<msg->data_count;i++){
+        // read each message_data from the data_ptr array
+        upmem_sim::message_data* data_ptr = (upmem_sim::message_data*)malloc(sizeof(upmem_sim::message_data));
+        std::cout<<"data_ptrs[i] address: "<<(Addr)(data_ptrs[i])<<std::endl;
+        virt_proxy.readBlob((Addr)(data_ptrs[i]), data_ptr, sizeof(upmem_sim::message_data));
+        printf("1\n");
+        void* data_buffer = malloc(data_ptr->size);
+        std::cout<<data_ptr->data<<std::endl;
+        virt_proxy.readBlob((Addr)(data_ptr->data), data_buffer, data_ptr->size);
+        printf("2\n");
+        datas.push_back(data_buffer);
+        printf("3\n");
+      }
+      for(size_t i=0;i<msg->data_count;i++){
+        // print each message_data content
+        std::cout<<(char*)datas[i]<<std::endl;
+      }
+
 
       printf("msg type %d\n",msg->type);
       DPRINTF(PseudoInst, "msg type %d\n",msg->type);
