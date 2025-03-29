@@ -77,7 +77,7 @@ extern "C"
   void m5_workload();
 
   //@PIM
-  void m5_reserved1();
+  void m5_reserved1(void* pkg);
 
 /*
  * Create _addr and _semi versions all declarations, e.g. m5_exit_addr and

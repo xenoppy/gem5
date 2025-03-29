@@ -36,6 +36,9 @@ namespace upmem_sim::simulator
 
     return stat_factory;
   }
+
+
+
   // 看上去是把bin扔到dpu的IRAM，DRAM，WRAM，MRAM里面
   void System::init()
   {

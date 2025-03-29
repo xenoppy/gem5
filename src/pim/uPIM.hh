@@ -29,12 +29,15 @@
 #ifndef __UPIM_HH__
 #define __UPIM_HH__
 
+#include <atomic>
+
 #include "mem/port.hh"
 #include "simulator/system.h"
 #include "util/argument_parser.h"
 #include "params/Dpu.hh"
 #include "params/uPIM.hh"
 #include "sim/sim_object.hh"
+
 
 namespace gem5
 {
@@ -48,6 +51,7 @@ namespace gem5
   class uPIM : public Dpu
   {
   private:
+    std::atomic<size_t> CQ_head, SQ_tail;
     upmem_sim::util::ArgumentParser *argument_parser;
     upmem_sim::simulator::System *system;
     void processCycle();

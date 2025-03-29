@@ -5,6 +5,8 @@ parsetab.py
 cscope.files
 cscope.out
 *.o
+*.so
+*.a
 *.out
 *.log
 *.do

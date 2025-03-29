@@ -1,18 +1,22 @@
 CC = g++
 GEM5_PATH = /home/weichu/my_gem5/gem5
+UPMEM_RUNTIME_PATH = $(GEM5_PATH)/pimtest/upmem-runtime
 TARGET_ISA = x86
 
 
 CFLAGS = -Wall -g
-CFLAGS += -I$(GEM5_PATH)/include
+CFLAGS += -I$(GEM5_PATH)/include -I$(UPMEM_RUNTIME_PATH)/src/
+
+LDFLAGS += $(UPMEM_RUNTIME_PATH)/bin/libupmem_runtime.a
 
 LDFLAGS += -L$(GEM5_PATH)/util/m5/build/$(TARGET_ISA)/out -lm5
 
-TARGET = simple_m5op.out
 
-ASM_TARGET = simple_m5op.s
+TARGET = single_dpu_message.out
 
-SOURCES = simple_m5op.cpp
+ASM_TARGET = single_dpu_message.s
+
+SOURCES = single_dpu_message.cpp
 
 
 all: $(TARGET) $(ASM_TARGET)

@@ -17,7 +17,9 @@ namespace upmem_sim::simulator
 
     util::StatFactory *stat_factory();
 
+
     bool is_finished() { return execuion_ == cpu_->num_executions(); }
+
 
     void init();
     void fini() { cpu_->fini(); }

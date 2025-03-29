@@ -28,7 +28,9 @@
 
 #include "pim/uPIM.hh"
 #include "pim/uPIMulator_backend/src/external.hh"
-#include "uPIM.hh"
+#include "pim/uPIM.hh"
+#include "pim/dpu_message.hh"
+
 
 namespace gem5
 {
@@ -119,7 +121,8 @@ namespace gem5
   }
   void uPIM::process_rank_Cycle()
   {
-    if (system != nullptr)
+    if(0)
+    // if (system != nullptr)
     {
       printf("uPIM: system has initialized, starting rank cycle\n");
       system->dpu_check_cycle(); // just to check if the system is finished
@@ -161,7 +164,7 @@ namespace gem5
     }
     else
     {
-      printf("uPIM: system is not initialized\n");
+      // printf("uPIM: system is not initialized\n");
       schedule(rank_cycle_event, curTick() + rank_clock);
     }
   }
@@ -285,7 +288,32 @@ namespace gem5
         }*/
     needRetry = true;
     printf("uPIM: enter recvTimingReq\n");
-    owner->system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
+    upmem_sim::Dpu_message* msg = reinterpret_cast<upmem_sim::Dpu_message *>(pkt->getPtr<uint8_t>());
+    printf("uPIM: pkg received. \n");
+    printf("uPIM: msg type: %d\n", msg->type);
+    switch (msg->type){
+      case upmem_sim::DPU_INIT:
+        {
+          upmem_sim::init_argument *arg = std::any_cast<upmem_sim::init_argument *>(msg->data);
+          printf("uPIM: DPU_INIT\n");
+          char **argv = arg->argv;
+          int argc = arg->argc;
+          upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
+          argument_parser->parse(argc, argv);
+          owner->system = new upmem_sim::simulator::System(argument_parser);
+          //owner->system->init();
+          printf("uPIM: DPU_INIT done\n");
+          break;
+        }
+      case upmem_sim::DPU_DOORBELL:
+        {
+          owner->SQ_tail = std::any_cast<upmem_sim::Doorbells *>(msg->data)->sq_tail;
+          owner->CQ_head = std::any_cast<upmem_sim::Doorbells *>(msg->data)->cq_head;
+
+          printf("uPIM: DPU_DOORBELL done\n");
+          break;
+        }
+    }
 
     printf("System updated\n");
     // pkt->makeTimingResponse();
