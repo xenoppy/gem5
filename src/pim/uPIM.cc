@@ -294,23 +294,36 @@ namespace gem5
     switch (msg->type){
       case upmem_sim::DPU_INIT:
         {
-          // upmem_sim::init_argument *arg = std::any_cast<upmem_sim::init_argument *>(msg->data);
-          // printf("uPIM: DPU_INIT\n");
-          // char **argv = arg->argv;
-          // int argc = arg->argc;
-          // upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
-          // argument_parser->parse(argc, argv);
-          // owner->system = new upmem_sim::simulator::System(argument_parser);
-          // //owner->system->init();
-          // printf("uPIM: DPU_INIT done\n");
+          printf("uPIM: DPU_INIT received\n");
+          const char** argv= new const char*[msg->data_count];
+          for (size_t i = 0; i < msg->data_count; ++i) {
+            // Read the data from the message_data structure
+            // Convert to string
+            argv[i] = static_cast<const char*>(msg->data_ptrs[i]->data);
+            std::cout<<"m"<<"uPIM: argv["<<i<<"]: "<<argv[i]<<std::endl;
+          }
+          int argc = msg->data_count;
+          for(int i = 0; i < argc; i++) {
+            printf("uPIM: argv[%d]: %s\n", i, argv[i]);
+          }
+          upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
+          argument_parser->parse(argc, argv);
+          //owner->system->init();
+          printf("uPIM: DPU_INIT done\n");
           break;
         }
-      case upmem_sim::DPU_DOORBELL:
+      case upmem_sim::DPU_LOAD:
         {
-          // owner->SQ_tail = std::any_cast<upmem_sim::Doorbells *>(msg->data)->sq_tail;
-          // owner->CQ_head = std::any_cast<upmem_sim::Doorbells *>(msg->data)->cq_head;
+          // Handle DPU_LOAD message
+          // Load binary or whatever is needed
+          printf("uPIM: DPU_LOAD received\n");
 
-          // printf("uPIM: DPU_DOORBELL done\n");
+          if (owner->system != nullptr) {
+            // Assuming system has a method to load binary
+            // owner->system->loadBinary(static_cast<const char*>(msg->data_ptrs[0]->data));
+            std::string binary_path(static_cast<const char*>(msg->data_ptrs[0]->data));
+            printf("uPIM: Loading binary from path: %s\n", binary_path.c_str());
+          }
           break;
         }
     }

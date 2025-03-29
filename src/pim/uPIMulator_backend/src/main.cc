@@ -66,50 +66,50 @@ namespace upmem_sim
 int start(int argc, char **argv)
 {
   printf("enter start\n");
-  upmem_sim::util::ArgumentParser *argument_parser =
-      upmem_sim::init_argument_parser();
-  printf("ready to parse\n");
-  argument_parser->parse(argc, argv);
+  // upmem_sim::util::ArgumentParser *argument_parser =
+  //     upmem_sim::init_argument_parser();
+  // printf("ready to parse\n");
+  // argument_parser->parse(argc, argv);
 
-  auto system = new upmem_sim::simulator::System(argument_parser);
-  printf("ready to init\n");
-  system->init();
-  printf("ready to cycle\n");
-  while (not system->is_finished())
-  {
-    system->cycle();
-  }
-  system->fini();
+  // auto system = new upmem_sim::simulator::System(argument_parser);
+  // printf("ready to init\n");
+  // system->init();
+  // printf("ready to cycle\n");
+  // while (not system->is_finished())
+  // {
+  //   system->cycle();
+  // }
+  // system->fini();
 
-  for (auto &option : argument_parser->options())
-  {
-    if (argument_parser->option_type(option) ==
-        upmem_sim::util::ArgumentParser::INT)
-    {
-      std::cout << option << ": " << argument_parser->get_int_parameter(option)
-                << std::endl;
-    }
-    else if (argument_parser->option_type(option) ==
-             upmem_sim::util::ArgumentParser::STRING)
-    {
-      std::cout << option << ": "
-                << argument_parser->get_string_parameter(option) << std::endl;
-    }
-    else
-    {
-      throw std::invalid_argument("");
-    }
-  }
+  // for (auto &option : argument_parser->options())
+  // {
+  //   if (argument_parser->option_type(option) ==
+  //       upmem_sim::util::ArgumentParser::INT)
+  //   {
+  //     std::cout << option << ": " << argument_parser->get_int_parameter(option)
+  //               << std::endl;
+  //   }
+  //   else if (argument_parser->option_type(option) ==
+  //            upmem_sim::util::ArgumentParser::STRING)
+  //   {
+  //     std::cout << option << ": "
+  //               << argument_parser->get_string_parameter(option) << std::endl;
+  //   }
+  //   else
+  //   {
+  //     throw std::invalid_argument("");
+  //   }
+  // }
 
-  upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
-  for (auto &stat : system_stat_factory->stats())
-  {
-    std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-  }
-  delete system_stat_factory;
+  // upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
+  // for (auto &stat : system_stat_factory->stats())
+  // {
+  //   std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+  // }
+  // delete system_stat_factory;
 
-  delete argument_parser;
-  delete system;
+  // delete argument_parser;
+  // delete system;
 
   return 0;
 }

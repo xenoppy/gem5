@@ -14,7 +14,7 @@ void ArgumentParser::add_option(Option option, OptionType option_type,
   default_parameters_[option] = default_parameter;
 }
 
-void ArgumentParser::parse(int argc, char **argv) {
+void ArgumentParser::parse(int argc, const char **argv) {
   assert(argc % 2 == 1);
 
   for (int i = 1; i < argc; i += 2) {

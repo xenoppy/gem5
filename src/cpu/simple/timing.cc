@@ -79,7 +79,7 @@ namespace gem5
   {
 
     argument_parser = upmem_sim::init_argument_parser();
-    char *argv[] = {
+    const char *argv[] = {
         (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
         (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
         (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]

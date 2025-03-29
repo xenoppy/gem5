@@ -19,7 +19,7 @@ class ArgumentParser {
 
   void add_option(Option option, OptionType option_type,
                   Parameter default_parameter);
-  void parse(int argc, char **argv);
+  void parse(int argc,const char **argv);
 
   std::set<Option> options();
   OptionType option_type(Option option) { return option_types_[option]; }

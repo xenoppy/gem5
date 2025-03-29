@@ -5,7 +5,6 @@ namespace upmem_sim
   enum message_type
   {
     DPU_INIT,
-    DPU_DOORBELL,
     DPU_LOAD,
   };
   struct message_data{
