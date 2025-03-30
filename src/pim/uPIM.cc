@@ -70,7 +70,8 @@ namespace gem5
     system->init();
     // schedule(cpu_cycle_event, curTick() + cpu_clock);
     */
-    schedule(rank_cycle_event, curTick() + rank_clock);
+   printf("uPIM: startup called\n");
+    //schedule(rank_cycle_event, curTick() + rank_clock);
   }
   // not used
   void uPIM::processCycle()
@@ -121,27 +122,11 @@ namespace gem5
   }
   void uPIM::process_rank_Cycle()
   {
-    if(0)
-    // if (system != nullptr)
+    //printf("%s: enter process_rank_Cycle\n", this->name().c_str());
+    if(system != nullptr && system->is_benchmark_set)
     {
-      printf("uPIM: system has initialized, starting rank cycle\n");
       system->dpu_check_cycle(); // just to check if the system is finished
-      if (system->is_zombie())
-      {
 
-        Request::Flags testflag(0);
-        RequestPtr req = std::make_shared<Request>(
-            0, 0, testflag, 0, 0, 0);
-        PacketPtr pkt = Packet::createRead(req);
-
-        pkt->dataDynamic<upmem_sim::simulator::System>(system);
-
-        pkt->makeTimingResponse();
-        printf("uPIM: sendTimingResp---is_zombie\n");
-        cpusidePort.sendTimingResp(pkt);
-        // send packet to cpu, then cpu check execution
-        //
-      }
       // cpusidePort.trySendRetry();
       if (not system->is_finished())
       {
@@ -161,6 +146,22 @@ namespace gem5
         printf("uPIM: sendTimingResp---is_finished\n");
         cpusidePort.sendTimingResp(pkt);
       }
+      if (system->is_zombie())
+      {
+
+        Request::Flags testflag(0);
+        RequestPtr req = std::make_shared<Request>(
+            0, 0, testflag, 0, 0, 0);
+        PacketPtr pkt = Packet::createRead(req);
+
+        pkt->dataDynamic<upmem_sim::simulator::System>(system);
+
+        pkt->makeTimingResponse();
+        printf("uPIM: sendTimingResp---is_zombie\n");
+        cpusidePort.sendTimingResp(pkt);
+        // send packet to cpu, then cpu check execution
+        //
+      }
     }
     else
     {
@@ -168,7 +169,7 @@ namespace gem5
       schedule(rank_cycle_event, curTick() + rank_clock);
     }
   }
-
+  //not used
   void uPIM::process_cpu_Cycle()
   {
     if (not system->is_finished())
@@ -307,8 +308,11 @@ namespace gem5
             printf("uPIM: argv[%d]: %s\n", i, argv[i]);
           }
           upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
+          owner->argument_parser = argument_parser;
           argument_parser->parse(argc, argv);
-          //owner->system->init();
+          owner->system = new upmem_sim::simulator::System(argument_parser);
+
+         //owner->system->init();
           printf("uPIM: DPU_INIT done\n");
           break;
         }
@@ -317,18 +321,57 @@ namespace gem5
           // Handle DPU_LOAD message
           // Load binary or whatever is needed
           printf("uPIM: DPU_LOAD received\n");
-
           if (owner->system != nullptr) {
             // Assuming system has a method to load binary
-            // owner->system->loadBinary(static_cast<const char*>(msg->data_ptrs[0]->data));
-            std::string binary_path(static_cast<const char*>(msg->data_ptrs[0]->data));
-            printf("uPIM: Loading binary from path: %s\n", binary_path.c_str());
+            // This is just a placeholder for actual loading logic
+            std::string binary(static_cast<const char*>(msg->data_ptrs[0]->data));
+            owner->system->set_benchmark(binary); // Set the benchmark name
+            owner->system->init();
+            printf("uPIM: Loading binary: %s\n", binary.c_str());
+          } else {
+            printf("uPIM: System not initialized, cannot load binary\n");
+          }
+          break;
+        }
+      case upmem_sim::DPU_LAUNCH:
+        {
+          // Handle DPU_LAUNCH message
+          // Launch the DPU execution
+          printf("uPIM: DPU_LAUNCH received\n");
+          if (owner->system != nullptr) {
+            if(owner->system->is_benchmark_set != false){
+              // Assuming system has a method to launch execution
+              // This is just a placeholder for actual launch logic
+
+              std::memcpy(&(owner->system->launch_policy), msg->data_ptrs[0]->data, sizeof(owner->system->launch_policy));
+              printf("uPIM: Launching DPU with policy: %d\n", owner->system->launch_policy);
+              owner->start_working();
+
+            }
+            else{
+              printf("uPIM: Benchmark not set, cannot launch DPU\n");
+            }
+          } else {
+            printf("uPIM: System not initialized, cannot launch DPU\n");
+          }
+          break;
+        }
+      case upmem_sim::DPU_UPDATE:
+        {
+          // Handle DPU_UPDATE message
+          // Update the DPU state or whatever is needed
+          printf("uPIM: DPU_UPDATE received\n");
+          if (owner->system != nullptr) {
+            //Not elegant at all...
+            owner->system=reinterpret_cast<upmem_sim::simulator::System *>(const_cast<void *>(msg->data_ptrs[0]->data));
+            printf("uPIM: DPU state updated\n");
+          } else {
+            printf("uPIM: System not initialized, cannot update DPU\n");
           }
           break;
         }
     }
-
-    printf("System updated\n");
+    printf("Message addressed done\n");
     // pkt->makeTimingResponse();
     // sendTimingResp(pkt);
     return false;

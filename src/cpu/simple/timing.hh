@@ -65,7 +65,7 @@ namespace gem5
     EventFunctionWrapper dpuEvent;
     void dpuEventProcess();
     upmem_sim::simulator::System *dpu_system;
-    upmem_sim::util::ArgumentParser *argument_parser;
+    //upmem_sim::util::ArgumentParser *argument_parser;
     /*
      * If an access needs to be broken into fragments, currently at most two,
      * the the following two classes are used as the sender state of the
@@ -273,10 +273,19 @@ namespace gem5
             owner(_cpu)
       {
       }
-      void send_packet_by_TimingReq(PacketPtr pkt)
+
+      void sendMsgbyTimingReq(upmem_sim::Dpu_message* msg);
+
+      upmem_sim::Dpu_message* makeSingleDataDpuMessage(
+          upmem_sim::message_type type,
+          size_t data_size,
+          void* data_ptr)
       {
-        printf("dpuPort: sendTimingReq\n");
-        sendTimingReq(pkt);
+
+        size_t argc=1;
+        upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+        argv_ptr[0] = new upmem_sim::message_data(data_size,data_ptr);
+        return new upmem_sim::Dpu_message(type, argc,argv_ptr);
       }
 
     protected:
@@ -320,10 +329,10 @@ namespace gem5
       return dpuPort;
     };
     //@PIM
-    void send_message_to_dpu(PacketPtr data) override
+    void sendPacketToDpu(PacketPtr pkt) override
     {
       if (dpuPort.isConnected())
-        dpuPort.send_packet_by_TimingReq(data);
+        dpuPort.sendTimingReq(pkt);
       else
         printf("dpuPort is not connected\n");
       return;

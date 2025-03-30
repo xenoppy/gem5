@@ -183,7 +183,7 @@ namespace gem5
     //@PIM
     virtual Port &getDpuPort() { return *static_cast<Port *>(nullptr); }
     //@PIM
-    virtual void send_message_to_dpu(PacketPtr data) {return;}
+    virtual void sendPacketToDpu(PacketPtr data) {return;}
     /** Reads this CPU's ID. */
     int cpuId() const { return _cpuId; }
 

@@ -5,7 +5,7 @@ TARGET_ISA = x86
 
 
 CFLAGS = -Wall -g
-CFLAGS += -I$(GEM5_PATH)/include -I$(UPMEM_RUNTIME_PATH)/src/
+CFLAGS += -I$(GEM5_PATH)/include -I$(GEM5_PATH)/src -I$(UPMEM_RUNTIME_PATH)/src/
 
 LDFLAGS += $(UPMEM_RUNTIME_PATH)/bin/libupmem_runtime.a
 

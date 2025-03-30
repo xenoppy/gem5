@@ -6,6 +6,14 @@ namespace upmem_sim
   {
     DPU_INIT,
     DPU_LOAD,
+    DPU_LAUNCH,
+    DPU_UPDATE,
+  };
+  enum dpu_launch_policy
+  {
+    DPU_DEFAULT,
+    DPU_ASYNCHRONOUS,
+    DPU_SYNCHRONOUS,
   };
   struct message_data{
     size_t size;

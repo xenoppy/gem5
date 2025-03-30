@@ -638,16 +638,14 @@ namespace gem5
       gem5::RequestPtr req = std::make_shared<gem5::Request>(
           0, 0, testflag, 0, 0, 0);
       gem5::PacketPtr pkg = gem5::Packet::createRead(req);
+
+      //read data array from simulated memory
       TranslatingPortProxy fs_proxy(tc);
       SETranslatingPortProxy se_proxy(tc);
       PortProxy &virt_proxy = FullSystem ? fs_proxy : se_proxy;
-
       upmem_sim::Dpu_message* msg=(upmem_sim::Dpu_message*)malloc(sizeof(upmem_sim::Dpu_message));
       virt_proxy.readBlob(data.addr, msg, sizeof(upmem_sim::Dpu_message));
 
-      printf("data: %ld, data.addr: %ld, msg: %ld\n",(long int)&data,data.addr,(long int)msg);
-      std::cout<<"msg type: "<<msg->type<<std::endl;
-      std::cout<<"data_count: "<<msg->data_count<<std::endl;
       upmem_sim::message_data** data_ptrs_buffer = (upmem_sim::message_data**)malloc(msg->data_count * sizeof(upmem_sim::message_data*));
       virt_proxy.readBlob((Addr)(msg->data_ptrs), data_ptrs_buffer, sizeof(upmem_sim::message_data*)* msg->data_count);
       msg->data_ptrs = (upmem_sim::message_data**)malloc(msg->data_count * sizeof(upmem_sim::message_data*));
@@ -662,15 +660,14 @@ namespace gem5
         data_ptr->data = data_buffer; // point to the actual data buffer
         msg->data_ptrs[i] = data_ptr; // store the pointer to the message_data
       }
-      for(size_t i=0;i<msg->data_count;i++){
-        std::cout<<"data_ptr["<<i<<"] size: "<<msg->data_ptrs[i]->size<<", data: "<<(const char*)msg->data_ptrs[i]->data<<std::endl;
-      }
+
+      //read done
 
       printf("msg type %d\n",msg->type);
       DPRINTF(PseudoInst, "msg type %d\n",msg->type);
       pkg->dataDynamic<upmem_sim::Dpu_message>(msg);
 
-      tc->getCpuPtr()->send_message_to_dpu(static_cast<gem5::PacketPtr>(pkg));
+      tc->getCpuPtr()->sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));
     }
 
   } // namespace pseudo_inst

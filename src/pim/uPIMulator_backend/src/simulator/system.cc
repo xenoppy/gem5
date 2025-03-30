@@ -5,12 +5,15 @@ namespace upmem_sim::simulator
 {
 
   System::System(util::ArgumentParser *argument_parser)
-      : cpu_(new cpu::CPU(argument_parser)),
+      : argument_parser_(argument_parser),
+        cpu_(new cpu::CPU(argument_parser)),
         rank_(new rank::Rank(argument_parser)),
         execuion_(0),
-        stat_factory_(new util::StatFactory("System"))
+        stat_factory_(new util::StatFactory("System")),
+        is_benchmark_set(false),
+        launch_policy(DPU_DEFAULT) // Default launch policy
   {
-    benchmark = argument_parser->get_string_parameter("benchmark");
+    //benchmark = argument_parser->get_string_parameter("benchmark");
 
     cpu_->connect_rank(rank_);
   }

@@ -9,6 +9,11 @@ class Thread {
  public:
   explicit Thread(util::ArgumentParser *argument_parser);
   ~Thread() = default;
+  void set_benchmark(std::string benchmark_name) {
+    benchmark_ = benchmark_name;
+    init_dpu_transfer_pointer();
+    init_num_executions();
+  }
 
   std::string benchmark() { return benchmark_; }
   int num_dpus() { return num_dpus_; }

@@ -17,7 +17,11 @@ class CPU {
   ~CPU();
 
   void connect_rank(rank::Rank *rank);
-
+  void set_benchmark(std::string benchmark_name) {
+    init_thread_->set_benchmark(benchmark_name);
+    sched_thread_->set_benchmark(benchmark_name);
+    fini_thread_->set_benchmark(benchmark_name);
+  }
   int num_executions() { return fini_thread_->num_executions(); }
 
   void init() { init_thread_->init(); }

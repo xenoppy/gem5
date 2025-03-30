@@ -17,7 +17,7 @@ namespace upmem_sim
     // level 2: level + prints UPMEM register file values per each logic cycle
     argument_parser->add_option("verbose", util::ArgumentParser::INT, "0");
 
-    argument_parser->add_option("benchmark", util::ArgumentParser::STRING, "TRNS");
+    //argument_parser->add_option("benchmark", util::ArgumentParser::STRING, "TRNS");
     argument_parser->add_option("num_dpus", util::ArgumentParser::INT, "1");
     argument_parser->add_option("num_tasklets", util::ArgumentParser::INT, "16");
 

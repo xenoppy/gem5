@@ -8,7 +8,7 @@ namespace upmem_sim::simulator::cpu {
 
 Thread::Thread(util::ArgumentParser *argument_parser)
     : bindir_(argument_parser->get_string_parameter("bindir")),
-      benchmark_(argument_parser->get_string_parameter("benchmark")),
+      //benchmark_(argument_parser->get_string_parameter("benchmark")),
       num_dpus_(
           static_cast<int>(argument_parser->get_int_parameter("num_dpus"))),
       num_tasklets_(static_cast<int>(
@@ -17,14 +17,15 @@ Thread::Thread(util::ArgumentParser *argument_parser)
   assert(0 < num_tasklets_ and
          num_tasklets_ <= util::ConfigLoader::max_num_tasklets());
 
-  init_dpu_transfer_pointer();
-  init_num_executions();
+  // init_dpu_transfer_pointer();
+  // init_num_executions();
 }
 
 encoder::ByteStream *Thread::load_byte_stream(std::string filename) {
   std::string bin_filepath = bindir_ + "/" + benchmark_ + "." +
                              std::to_string(num_tasklets_) + "/" + filename +
                              ".bin";
+  std::cout << "Loading byte stream from: " << bin_filepath << std::endl;
   if (std::filesystem::exists(bin_filepath)) {
     auto byte_stream = new encoder::ByteStream(bin_filepath);
     return byte_stream;

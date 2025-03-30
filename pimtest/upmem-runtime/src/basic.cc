@@ -6,7 +6,6 @@
 #include "../include/gem5/m5ops.h"
 
 #include "byte_stream.h"
-#include "pim/dpu_message.hh"
 
 
 
@@ -25,9 +24,7 @@ void dpu_init(int nr_tasklets, char *bindir, char *logdir){
   }
 
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_INIT,args.size(),argv_ptr);
-  printf("before m5_reserved1\n");
-  printf("msg type %d\n",msg->type);
-  printf("msg addr: %ld\n",msg);
+  printf("init ready to call m5_op, msg type %d\n",msg->type);
   m5_reserved1(msg);
   return;
 
@@ -39,13 +36,10 @@ void dpu_load(std::string binary_path)
 {
   printf("entering dpu_load\n");
   size_t argc=1;
-  const char *argv=binary_path.c_str(); // Convert std::string to char* for the DPU message
   upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
   argv_ptr[0] = new upmem_sim::message_data(binary_path.size()+1,binary_path.c_str());
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_LOAD,argc,argv_ptr);
-  printf("before m5_reserved1\n");
-  printf("msg type %d\n",msg->type);
-  printf("msg addr: %ld\n",msg);
+  printf("load ready to call m5_op, msg type %d\n",msg->type);
   m5_reserved1((void*)msg);
 
 }
@@ -54,6 +48,13 @@ void dpu_trans()
 {
 }
 
-void dpu_launch()
+void dpu_launch(upmem_sim::dpu_launch_policy policy)
 {
+  size_t argc=1;
+  upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+  argv_ptr[0] = new upmem_sim::message_data(sizeof(upmem_sim::dpu_launch_policy),&policy);
+  upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_LAUNCH,argc,argv_ptr);
+  printf("init ready to call m5_op, msg type %d\n",msg->type);
+  m5_reserved1((void*)msg);
+
 }

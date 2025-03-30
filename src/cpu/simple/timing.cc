@@ -57,42 +57,42 @@
 #include "sim/full_system.hh"
 #include "sim/system.hh"
 #include "timing.hh"
+#include "pim/dpu_message.hh"
 
 namespace gem5
 {
 
-  // //@PIM
-  // void TimingSimpleCPU::DpuPort::send_data_by_TimingReq
-  //           (upmem_sim::simulator::System *dpu_system)
-  // {
-  //   Request::Flags testflag(0);
-  //   RequestPtr req = std::make_shared<Request>(
-  //       0, 0, testflag, 0, 0, 0);
-  //   PacketPtr pkt = Packet::createRead(req);
 
-  //   pkt->dataDynamic<upmem_sim::simulator::System>(dpu_system);
-
-  //   sendTimingReq(pkt);
-  // }
   //@PIM
-  void TimingSimpleCPU::dpuinit()
+  void TimingSimpleCPU::DpuPort::sendMsgbyTimingReq(upmem_sim::Dpu_message* msg)
   {
-
-    argument_parser = upmem_sim::init_argument_parser();
-    const char *argv[] = {
-        (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
-        (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
-        (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
-        (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
-        (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]);
-    argument_parser->parse(argc, argv);
-
-    dpu_system = new upmem_sim::simulator::System(argument_parser);
-    dpu_system->init();
-    // dpuPort.sendSystemByTimingReq(dpu_system);
+    Request::Flags testflag(0);
+    RequestPtr req = std::make_shared<Request>(
+        0, 0, testflag, 0, 0, 0);
+    PacketPtr pkt = Packet::createRead(req);
+    pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
+    sendTimingReq(pkt);
   }
+  //@PIM
+  //not used
+  // void TimingSimpleCPU::dpuinit()
+  // {
+
+  //   argument_parser = upmem_sim::init_argument_parser();
+  //   const char *argv[] = {
+  //       (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
+  //       (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
+  //       (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
+  //       (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
+  //       (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
+  //   };
+  //   int argc = sizeof(argv) / sizeof(argv[0]);
+  //   argument_parser->parse(argc, argv);
+
+  //   dpu_system = new upmem_sim::simulator::System(argument_parser);
+  //   dpu_system->init();
+  //   // dpuPort.sendSystemByTimingReq(dpu_system);
+  // }
   //@PIM
   void
   TimingSimpleCPU::init()
@@ -1318,44 +1318,59 @@ namespace gem5
     }
   }
 
-  bool TimingSimpleCPU::DpuPort::recvTimingResp(PacketPtr pkt)
+bool TimingSimpleCPU::DpuPort::recvTimingResp(PacketPtr pkt)
   {
-    printf("DpuPort: recvTimingResp---system updated\n");
-    // owner->dpu_system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
-    // if (not owner->dpu_system->is_finished())
-    // {
-    //   owner->dpu_system->cpu_check_cycle();
-    //   sendSystemByTimingReq(owner->dpu_system);
-    // }
-    // else
-    // {
-    //   owner->dpu_system->fini();
+    printf("DpuPort: recvTimingResp\n");
+    owner->dpu_system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
+    if (not owner->dpu_system->is_finished())
+    {
+      if(owner->dpu_system->is_zombie())
+      {
+        owner->dpu_system->cpu_check_cycle();
+        sendMsgbyTimingReq(makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE,
+          sizeof(upmem_sim::simulator::System),
+          (owner->dpu_system))
+        );
+      }
+    }
+    else
+    {
+      printf("0\n");
+      owner->dpu_system->fini();
 
-    //   for (auto &option : owner->argument_parser->options())
-    //   {
-    //     if (owner->argument_parser->option_type(option) ==
-    //         upmem_sim::util::ArgumentParser::INT)
-    //     {
-    //       std::cout << option << ": " << owner->argument_parser->get_int_parameter(option)
-    //                 << std::endl;
-    //     }
-    //     else if (owner->argument_parser->option_type(option) ==
-    //              upmem_sim::util::ArgumentParser::STRING)
-    //     {
-    //       std::cout << option << ": "
-    //                 << owner->argument_parser->get_string_parameter(option) << std::endl;
-    //     }
-    //     else
-    //     {
-    //       throw std::invalid_argument("");
-    //     }
-    //   }
-    //   upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
-    //   for (auto &stat : system_stat_factory->stats())
-    //   {
-    //     std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-    //   }
-    // }
+      printf("1\n");
+      for (auto &option : owner->dpu_system->get_argument_parser()->options())
+      {
+        printf("2\n");
+        if (owner->dpu_system->get_argument_parser()->option_type(option) ==
+            upmem_sim::util::ArgumentParser::INT)
+        {
+          printf("3\n");
+          std::cout << option << ": " << owner->dpu_system->get_argument_parser()->get_int_parameter(option)
+                    << std::endl;
+        }
+        else if (owner->dpu_system->get_argument_parser()->option_type(option) ==
+                 upmem_sim::util::ArgumentParser::STRING)
+        {
+          printf("4\n");
+          std::cout << option << ": "
+                    << owner->dpu_system->get_argument_parser()->get_string_parameter(option) << std::endl;
+        }
+        else
+        {
+          printf("5\n");
+          throw std::invalid_argument("");
+        }
+      }
+      printf("6\n");
+      upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
+      printf("7\n");
+      for (auto &stat : system_stat_factory->stats())
+      {
+        printf("8\n");
+        std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+      }
+    }
     return false;
   }
 

@@ -54,6 +54,7 @@ namespace gem5
     std::atomic<size_t> CQ_head, SQ_tail;
     upmem_sim::util::ArgumentParser *argument_parser;
     upmem_sim::simulator::System *system;
+
     void processCycle();
     EventFunctionWrapper cycle_event;
     void process_rank_Cycle();
@@ -158,6 +159,11 @@ namespace gem5
     Port &getPort(const std::string &if_name,
                   PortID idx = InvalidPortID) override;
     void startup() override;
+    void start_working(){
+      printf("uPIM: system has initialized and binary loaded, starting rank cycle\n");
+      schedule(rank_cycle_event, curTick() + cpu_clock);
+      return;
+    }
   };
 
 } // namespace gem5
