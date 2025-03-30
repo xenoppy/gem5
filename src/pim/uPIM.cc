@@ -40,86 +40,19 @@ namespace gem5
   }
 
   uPIM::uPIM(const uPIMParams &p) : Dpu(p), cpu_clock(p.cpu_clock), rank_clock(p.rank_clock),
-                                    cycle_event([this]
-                                                { processCycle(); }, name()),
                                     rank_cycle_event([this]
                                                      { process_rank_Cycle(); }, name()),
-                                    cpu_cycle_event([this]
-                                                    { process_cpu_Cycle(); }, name()),
                                     cpusidePort(name() + ".cpu_side", this),
                                     system(nullptr)
   {
     printf("enter uPIM\n");
-
-    // start(argc,argv);
   }
 
   void uPIM::startup()
   {
-    /*argument_parser = upmem_sim::init_argument_parser();
-    char *argv[] = {
-        (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
-        (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
-        (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
-        (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
-        (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
-    };
-    int argc = sizeof(argv) / sizeof(argv[0]);
-    argument_parser->parse(argc, argv);
-    system = new upmem_sim::simulator::System(argument_parser);
-    system->init();
-    // schedule(cpu_cycle_event, curTick() + cpu_clock);
-    */
    printf("uPIM: startup called\n");
-    //schedule(rank_cycle_event, curTick() + rank_clock);
   }
-  // not used
-  void uPIM::processCycle()
-  {
 
-    // printf("%s: enter processCycle\n", this->name().c_str());
-    if (not system->is_finished())
-    {
-      // system->cycle();
-      // schedule(cycle_event, curTick() + dpu_cycle_);
-    }
-    else
-    {
-      printf("uPIM: system is finished\n");
-
-      system->fini();
-
-      for (auto &option : argument_parser->options())
-      {
-        if (argument_parser->option_type(option) ==
-            upmem_sim::util::ArgumentParser::INT)
-        {
-          std::cout << option << ": " << argument_parser->get_int_parameter(option)
-                    << std::endl;
-        }
-        else if (argument_parser->option_type(option) ==
-                 upmem_sim::util::ArgumentParser::STRING)
-        {
-          std::cout << option << ": "
-                    << argument_parser->get_string_parameter(option) << std::endl;
-        }
-        else
-        {
-          throw std::invalid_argument("");
-        }
-      }
-
-      upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
-      for (auto &stat : system_stat_factory->stats())
-      {
-        std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-      }
-      delete system_stat_factory;
-
-      delete argument_parser;
-      delete system;
-    }
-  }
   void uPIM::process_rank_Cycle()
   {
     //printf("%s: enter process_rank_Cycle\n", this->name().c_str());
@@ -167,52 +100,6 @@ namespace gem5
     {
       // printf("uPIM: system is not initialized\n");
       schedule(rank_cycle_event, curTick() + rank_clock);
-    }
-  }
-  //not used
-  void uPIM::process_cpu_Cycle()
-  {
-    if (not system->is_finished())
-    {
-      system->cpu_cycle();
-      schedule(cpu_cycle_event, curTick() + cpu_clock);
-    }
-
-    else
-    {
-      printf("uPIM: system is finished\n");
-
-      system->fini();
-
-      for (auto &option : argument_parser->options())
-      {
-        if (argument_parser->option_type(option) ==
-            upmem_sim::util::ArgumentParser::INT)
-        {
-          std::cout << option << ": " << argument_parser->get_int_parameter(option)
-                    << std::endl;
-        }
-        else if (argument_parser->option_type(option) ==
-                 upmem_sim::util::ArgumentParser::STRING)
-        {
-          std::cout << option << ": "
-                    << argument_parser->get_string_parameter(option) << std::endl;
-        }
-        else
-        {
-          throw std::invalid_argument("");
-        }
-      }
-
-      upmem_sim::util::StatFactory *system_stat_factory = system->stat_factory();
-      for (auto &stat : system_stat_factory->stats())
-      {
-        std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-      }
-      delete system_stat_factory;
-
-      delete argument_parser;
-      delete system;
     }
   }
 
@@ -277,16 +164,6 @@ namespace gem5
   bool
   uPIM::CPUSidePort::recvTimingReq(PacketPtr pkt)
   {
-    // Just forward to the memobj.
-    /*    if (!owner->handleRequest(pkt))
-        {
-          needRetry = true;
-          return false;
-        }
-        else
-        {
-          return true;
-        }*/
     needRetry = true;
     printf("uPIM: enter recvTimingReq\n");
     upmem_sim::Dpu_message* msg = reinterpret_cast<upmem_sim::Dpu_message *>(pkt->getPtr<uint8_t>());

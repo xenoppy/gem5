@@ -73,26 +73,7 @@ namespace gem5
     pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
     sendTimingReq(pkt);
   }
-  //@PIM
-  //not used
-  // void TimingSimpleCPU::dpuinit()
-  // {
 
-  //   argument_parser = upmem_sim::init_argument_parser();
-  //   const char *argv[] = {
-  //       (char *)"./src/uPIMulator",                                                 // argv[0]: 程序名
-  //       (char *)"--benchmark", (char *)"RED",                                       // argv[1], argv[2]
-  //       (char *)"--num_tasklets", (char *)"16",                                     // argv[3], argv[4]
-  //       (char *)"--bindir", (char *)"/home/weichu/my_gem5/gem5/src/pim/bin/1_dpus", // argv[5], argv[6]
-  //       (char *)"--logdir", (char *)"."                                             // argv[7], argv[8]
-  //   };
-  //   int argc = sizeof(argv) / sizeof(argv[0]);
-  //   argument_parser->parse(argc, argv);
-
-  //   dpu_system = new upmem_sim::simulator::System(argument_parser);
-  //   dpu_system->init();
-  //   // dpuPort.sendSystemByTimingReq(dpu_system);
-  // }
   //@PIM
   void
   TimingSimpleCPU::init()

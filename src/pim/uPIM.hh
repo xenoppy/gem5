@@ -55,12 +55,8 @@ namespace gem5
     upmem_sim::util::ArgumentParser *argument_parser;
     upmem_sim::simulator::System *system;
 
-    void processCycle();
-    EventFunctionWrapper cycle_event;
     void process_rank_Cycle();
     EventFunctionWrapper rank_cycle_event;
-    void process_cpu_Cycle();
-    EventFunctionWrapper cpu_cycle_event;
     const Tick rank_clock, cpu_clock;
 
     class CPUSidePort : public ResponsePort
