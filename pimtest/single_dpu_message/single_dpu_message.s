@@ -188,12 +188,10 @@ main:
 	.loc 3 15 3
 	nop
 .L7:
-	.loc 3 15 18 discriminator 1
+	.loc 3 15 19 discriminator 1
 	call	_Z9dpu_checkv@PLT
-	movzbl	%al, %eax
-	.loc 3 15 21 discriminator 1
-	testl	%eax, %eax
-	sete	%al
+	.loc 3 15 9 discriminator 1
+	xorl	$1, %eax
 	testb	%al, %al
 	jne	.L7
 	.loc 3 18 9
@@ -9808,7 +9806,7 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.byte	0x4
 	.long	0x72
 	.byte	0x30
-	.byte	0xd
+	.byte	0x11
 	.byte	0x8
 	.uleb128 0x32
 	.long	.LASF804
@@ -9863,7 +9861,7 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x29
 	.long	.LASF811
 	.byte	0x31
-	.byte	0x8
+	.byte	0x10
 	.byte	0x6
 	.long	.LASF812
 	.long	0x5114
@@ -9873,7 +9871,7 @@ _ZNSt8__detail30__integer_to_chars_is_unsignedIyEE:
 	.uleb128 0x29
 	.long	.LASF813
 	.byte	0x31
-	.byte	0x7
+	.byte	0xf
 	.byte	0x6
 	.long	.LASF814
 	.long	0x5134

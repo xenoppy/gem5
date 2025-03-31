@@ -340,13 +340,10 @@ namespace gem5
     //@PIM
     bool checkDpuSystemFinished() override
     {
-      if(dpu_system && dpu_system->is_finished())
-      {
-        // If dpu_system is not initialized, return false.
-        return true;
+      if(is_dpu_all_done){
+        printf("is_dpu_all_done\n");
       }
-      //schedule(waitDpuSystemFinishedEvent, curTick()+clockPeriod()*100); // Check every 100 ticks
-      return false;
+      return is_dpu_all_done;
     }
 
   public:

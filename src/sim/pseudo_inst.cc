@@ -631,7 +631,7 @@ namespace gem5
     }
 
     //@PIM
-    bool PIMtest(ThreadContext *tc, GuestAddr data)
+    uint64_t PIMtest(ThreadContext *tc, GuestAddr data)
     {
       //printf("pseudo_inst::PIMtest()\n");
       gem5::Request::Flags testflag(0);
@@ -665,12 +665,18 @@ namespace gem5
 
       //printf("msg type %d\n",msg->type);
       if(msg->type==upmem_sim::DPU_CHECK_FINISHED){
-        return tc->getCpuPtr()->checkDpuSystemFinished();
+        bool ret=tc->getCpuPtr()->checkDpuSystemFinished();
+        if(ret){
+          printf("pseudo_inst get true\n");
+          return 1;
+        }
+        return 0;
       }
       pkg->dataDynamic<upmem_sim::Dpu_message>(msg);
 
       tc->getCpuPtr()->sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));
-      return true;
+      std::cout<<"PIMtest: sent message to DPU, msg type"<<std::endl;
+      return 1;
     }
 
   } // namespace pseudo_inst

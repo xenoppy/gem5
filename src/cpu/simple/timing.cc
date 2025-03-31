@@ -1345,6 +1345,7 @@ bool TimingSimpleCPU::DpuPort::recvTimingResp(PacketPtr pkt)
       {
         std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
       }
+      owner->is_dpu_all_done = true;
     }
     return false;
   }

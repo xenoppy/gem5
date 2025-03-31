@@ -78,10 +78,10 @@ namespace gem5
         pkt->makeTimingResponse();
         printf("uPIM: sendTimingResp---is_finished\n");
         cpusidePort.sendTimingResp(pkt);
+        return;
       }
       if (system->is_zombie())
       {
-
         Request::Flags testflag(0);
         RequestPtr req = std::make_shared<Request>(
             0, 0, testflag, 0, 0, 0);
