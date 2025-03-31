@@ -667,15 +667,13 @@ namespace gem5
       if(msg->type==upmem_sim::DPU_CHECK_FINISHED){
         bool ret=tc->getCpuPtr()->checkDpuSystemFinished();
         if(ret){
-          printf("pseudo_inst get true\n");
           return 1;
         }
         return 0;
       }
       pkg->dataDynamic<upmem_sim::Dpu_message>(msg);
-
+      tc->getCpuPtr()->setDpuSystemFinished(false);
       tc->getCpuPtr()->sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));
-      std::cout<<"PIMtest: sent message to DPU, msg type"<<std::endl;
       return 1;
     }
 

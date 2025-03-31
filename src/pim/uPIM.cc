@@ -34,6 +34,27 @@
 
 namespace gem5
 {
+
+  inline upmem_sim::Dpu_message* makeSingleDataDpuMessage(
+    upmem_sim::message_type type,
+    size_t data_size,
+    void* data_ptr)
+  {
+    size_t argc=1;
+    upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+    argv_ptr[0] = new upmem_sim::message_data(data_size,data_ptr);
+    return new upmem_sim::Dpu_message(type, argc,argv_ptr);
+  }
+
+  PacketPtr make_pkt()
+  {
+    Request::Flags testflag(0);
+    RequestPtr req = std::make_shared<Request>(
+        0, 0, testflag, 0, 0, 0);
+    return Packet::createRead(req);
+
+  }
+
   Dpu::Dpu(const DpuParams &p) : SimObject(p)
   {
     printf("enter DPU\n");
@@ -68,32 +89,26 @@ namespace gem5
       }
       else
       {
-        Request::Flags testflag(0);
-        RequestPtr req = std::make_shared<Request>(
-            0, 0, testflag, 0, 0, 0);
-        PacketPtr pkt = Packet::createRead(req);
-
-        pkt->dataDynamic<upmem_sim::simulator::System>(system);
-
-        pkt->makeTimingResponse();
         printf("uPIM: sendTimingResp---is_finished\n");
+        PacketPtr pkt = make_pkt();
+        upmem_sim::Dpu_message* msg = makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE_SYSTEM,
+                                  sizeof(upmem_sim::simulator::System*),
+                                  system);
+        pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
+        pkt->makeTimingResponse();
         cpusidePort.sendTimingResp(pkt);
         return;
       }
       if (system->is_zombie())
       {
-        Request::Flags testflag(0);
-        RequestPtr req = std::make_shared<Request>(
-            0, 0, testflag, 0, 0, 0);
-        PacketPtr pkt = Packet::createRead(req);
-
-        pkt->dataDynamic<upmem_sim::simulator::System>(system);
-
-        pkt->makeTimingResponse();
         printf("uPIM: sendTimingResp---is_zombie\n");
+        PacketPtr pkt = make_pkt();
+        upmem_sim::Dpu_message* msg = makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE_SYSTEM,
+                                  sizeof(upmem_sim::simulator::System*),
+                                  system);
+        pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
+        pkt->makeTimingResponse();
         cpusidePort.sendTimingResp(pkt);
-        // send packet to cpu, then cpu check execution
-        //
       }
     }
     else
@@ -191,6 +206,7 @@ namespace gem5
 
          //owner->system->init();
           printf("uPIM: DPU_INIT done\n");
+
           break;
         }
       case upmem_sim::DPU_LOAD:
@@ -204,7 +220,8 @@ namespace gem5
             std::string binary(static_cast<const char*>(msg->data_ptrs[0]->data));
             owner->system->set_benchmark(binary); // Set the benchmark name
             owner->system->init();
-            printf("uPIM: Loading binary: %s\n", binary.c_str());
+            printf("uPIM: Loading binary done: %s\n", binary.c_str());
+
           } else {
             printf("uPIM: System not initialized, cannot load binary\n");
           }
@@ -231,7 +248,8 @@ namespace gem5
           } else {
             printf("uPIM: System not initialized, cannot launch DPU\n");
           }
-          break;
+          //only after dpu workdone, then is_finished will be set to true
+          return false;
         }
       case upmem_sim::DPU_UPDATE:
         {
@@ -242,6 +260,7 @@ namespace gem5
             //Not elegant at all...
             owner->system=reinterpret_cast<upmem_sim::simulator::System *>(const_cast<void *>(msg->data_ptrs[0]->data));
             printf("uPIM: DPU state updated\n");
+
           } else {
             printf("uPIM: System not initialized, cannot update DPU\n");
           }
@@ -255,9 +274,13 @@ namespace gem5
           exit(2);
         }
     }
+    //response
+    PacketPtr resp_pkt = make_pkt();
+    upmem_sim::Dpu_message* resp_msg = new upmem_sim::Dpu_message(upmem_sim::DPU_FINISHED,0,nullptr);
+    resp_pkt->dataDynamic<upmem_sim::Dpu_message>(resp_msg);
+    resp_pkt->makeTimingResponse();
+    sendTimingResp(resp_pkt);
     printf("Message addressed done\n");
-    // pkt->makeTimingResponse();
-    // sendTimingResp(pkt);
     return false;
   }
 

@@ -165,7 +165,8 @@ namespace gem5
     SignalSinkPort<bool> modelResetPort;
 
     //@PIM
-    bool is_dpu_all_done;
+    //note: only for chronous
+    bool is_dpu_finished;
 
   public:
     /**
@@ -185,9 +186,9 @@ namespace gem5
     virtual Port &getInstPort() = 0;
     //@PIM
     virtual Port &getDpuPort() { return *static_cast<Port *>(nullptr); }
-    virtual void sendPacketToDpu(PacketPtr data) {exit(1);}
-    virtual bool checkDpuSystemFinished(){printf("virtual func not implemented\n");exit(1); }
-
+    virtual void sendPacketToDpu(PacketPtr data) {printf("virtual func not implemented\n");exit(1);}
+    virtual bool checkDpuSystemFinished(){printf("virtual func not implemented\n");exit(1);  }
+    virtual void setDpuSystemFinished(bool finished){printf("virtual func not implemented\n");exit(1); }
     /** Reads this CPU's ID. */
     int cpuId() const { return _cpuId; }
 

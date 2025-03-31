@@ -9,6 +9,14 @@ namespace upmem_sim
     DPU_LAUNCH,
     DPU_UPDATE,
     DPU_CHECK_FINISHED,
+    //ASYNCHRONOUS
+    DPU_INIT_ASYNCHRONOUS = 100,
+    DPU_LOAD_ASYNCHRONOUS,
+    DPU_LAUNCH_ASYNCHRONOUS,
+    //RESPONSE
+    DPU_FINISHED=200,
+    DPU_UPDATE_SYSTEM,
+
   };
   enum dpu_launch_policy
   {
@@ -31,6 +39,9 @@ namespace upmem_sim
       Dpu_message(message_type type_, size_t data_count_, message_data** data_ptr_): type(type_), data_ptrs(data_ptr_),data_count(data_count_) {};
 
   };
+
+
+
 
 }
 

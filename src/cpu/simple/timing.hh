@@ -276,17 +276,7 @@ namespace gem5
 
       void sendMsgbyTimingReq(upmem_sim::Dpu_message* msg);
 
-      upmem_sim::Dpu_message* makeSingleDataDpuMessage(
-          upmem_sim::message_type type,
-          size_t data_size,
-          void* data_ptr)
-      {
 
-        size_t argc=1;
-        upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
-        argv_ptr[0] = new upmem_sim::message_data(data_size,data_ptr);
-        return new upmem_sim::Dpu_message(type, argc,argv_ptr);
-      }
 
     protected:
       TimingSimpleCPU *owner;
@@ -340,10 +330,16 @@ namespace gem5
     //@PIM
     bool checkDpuSystemFinished() override
     {
-      if(is_dpu_all_done){
-        printf("is_dpu_all_done\n");
+      if(is_dpu_finished){
+        printf("is_dpu_finished\n");
       }
-      return is_dpu_all_done;
+      return is_dpu_finished;
+    }
+    //@PIM
+    void setDpuSystemFinished(bool finished) override
+    {
+      is_dpu_finished = finished;
+      return;
     }
 
   public:

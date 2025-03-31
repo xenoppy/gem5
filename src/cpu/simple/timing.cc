@@ -62,7 +62,17 @@
 namespace gem5
 {
 
-
+  //@PIM
+  inline upmem_sim::Dpu_message* makeSingleDataDpuMessage(
+    upmem_sim::message_type type,
+    size_t data_size,
+    void* data_ptr)
+  {
+    size_t argc=1;
+    upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+    argv_ptr[0] = new upmem_sim::message_data(data_size,data_ptr);
+    return new upmem_sim::Dpu_message(type, argc,argv_ptr);
+  }
   //@PIM
   void TimingSimpleCPU::DpuPort::sendMsgbyTimingReq(upmem_sim::Dpu_message* msg)
   {
@@ -1305,47 +1315,59 @@ namespace gem5
 
 bool TimingSimpleCPU::DpuPort::recvTimingResp(PacketPtr pkt)
   {
-    printf("DpuPort: recvTimingResp\n");
-    owner->dpu_system = reinterpret_cast<upmem_sim::simulator::System *>(pkt->getPtr<uint8_t>());
-    if (not owner->dpu_system->is_finished())
-    {
-      if(owner->dpu_system->is_zombie())
-      {
-        owner->dpu_system->cpu_check_cycle();
-        sendMsgbyTimingReq(makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE,
-          sizeof(upmem_sim::simulator::System),
-          (owner->dpu_system))
-        );
-      }
-    }
-    else
-    {
-      owner->dpu_system->fini();
-      for (auto &option : owner->dpu_system->get_argument_parser()->options())
-      {
-        if (owner->dpu_system->get_argument_parser()->option_type(option) ==
-            upmem_sim::util::ArgumentParser::INT)
+    upmem_sim::Dpu_message* msg = reinterpret_cast<upmem_sim::Dpu_message *>(pkt->getPtr<uint8_t>());
+    switch(msg->type){
+      case upmem_sim::DPU_FINISHED:
+        printf("DpuPort: recvTimingResp DPU_FINISHED\n");
+        owner->is_dpu_finished = true;
+        break;
+      case upmem_sim::DPU_UPDATE_SYSTEM:
+        printf("DpuPort: recvTimingResp DPU_UPDATE_SYSTEM\n");
+        owner->dpu_system = reinterpret_cast<upmem_sim::simulator::System *>(const_cast<void*>(msg->data_ptrs[0]->data));
+        if (not owner->dpu_system->is_finished())
         {
-          std::cout << option << ": " << owner->dpu_system->get_argument_parser()->get_int_parameter(option)
-                    << std::endl;
-        }
-        else if (owner->dpu_system->get_argument_parser()->option_type(option) ==
-                 upmem_sim::util::ArgumentParser::STRING)
-        {
-          std::cout << option << ": "
-                    << owner->dpu_system->get_argument_parser()->get_string_parameter(option) << std::endl;
+          if(owner->dpu_system->is_zombie())
+          {
+            owner->dpu_system->cpu_check_cycle();
+            sendMsgbyTimingReq(makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE,
+              sizeof(upmem_sim::simulator::System*),
+              (owner->dpu_system))
+            );
+          }
         }
         else
         {
-          throw std::invalid_argument("");
+          owner->dpu_system->fini();
+          for (auto &option : owner->dpu_system->get_argument_parser()->options())
+          {
+            if (owner->dpu_system->get_argument_parser()->option_type(option) ==
+                upmem_sim::util::ArgumentParser::INT)
+            {
+              std::cout << option << ": " << owner->dpu_system->get_argument_parser()->get_int_parameter(option)
+                        << std::endl;
+            }
+            else if (owner->dpu_system->get_argument_parser()->option_type(option) ==
+                    upmem_sim::util::ArgumentParser::STRING)
+            {
+              std::cout << option << ": "
+                        << owner->dpu_system->get_argument_parser()->get_string_parameter(option) << std::endl;
+            }
+            else
+            {
+              throw std::invalid_argument("");
+            }
+          }
+          upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
+          for (auto &stat : system_stat_factory->stats())
+          {
+            std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+          }
+          owner->is_dpu_finished = true;
         }
-      }
-      upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
-      for (auto &stat : system_stat_factory->stats())
-      {
-        std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-      }
-      owner->is_dpu_all_done = true;
+        break;
+      default:
+        printf("DpuPort: recvTimingResp unknown type %d\n", msg->type);
+        exit(1);
     }
     return false;
   }

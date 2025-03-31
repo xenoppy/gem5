@@ -12,9 +12,6 @@ int main()
   dpu_load("RED");
   printf("dpu_load done\n");
   dpu_launch(upmem_sim::dpu_launch_policy::DPU_ASYNCHRONOUS);
-  while(!dpu_check()) {
-    //printf("Checking DPU status...\n");
-  }
   printf("dpu_work done\n");
 
   return 0;

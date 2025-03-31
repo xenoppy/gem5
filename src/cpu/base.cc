@@ -147,7 +147,7 @@ namespace gem5
         powerGatingOnIdle(p.power_gating_on_idle),
         enterPwrGatingEvent([this]
                             { enterPwrGating(); }, name()),
-        is_dpu_all_done(false)//@PIM
+        is_dpu_finished(false)//@PIM
   {
     // if Python did not provide a valid ID, do it here
     if (_cpuId == -1)
