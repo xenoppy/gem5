@@ -247,6 +247,13 @@ namespace gem5
           }
           break;
         }
+
+      default:
+        {
+          // Handle unknown message type
+          printf("uPIM: Unknown message type received: %d\n", msg->type);
+          exit(2);
+        }
     }
     printf("Message addressed done\n");
     // pkt->makeTimingResponse();

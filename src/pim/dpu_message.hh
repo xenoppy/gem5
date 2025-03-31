@@ -8,6 +8,7 @@ namespace upmem_sim
     DPU_LOAD,
     DPU_LAUNCH,
     DPU_UPDATE,
+    DPU_CHECK_FINISHED,
   };
   enum dpu_launch_policy
   {

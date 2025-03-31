@@ -631,9 +631,9 @@ namespace gem5
     }
 
     //@PIM
-    void PIMtest(ThreadContext *tc, GuestAddr data)
+    bool PIMtest(ThreadContext *tc, GuestAddr data)
     {
-      printf("pseudo_inst::PIMtest()\n");
+      //printf("pseudo_inst::PIMtest()\n");
       gem5::Request::Flags testflag(0);
       gem5::RequestPtr req = std::make_shared<gem5::Request>(
           0, 0, testflag, 0, 0, 0);
@@ -663,11 +663,14 @@ namespace gem5
 
       //read done
 
-      printf("msg type %d\n",msg->type);
-      DPRINTF(PseudoInst, "msg type %d\n",msg->type);
+      //printf("msg type %d\n",msg->type);
+      if(msg->type==upmem_sim::DPU_CHECK_FINISHED){
+        return tc->getCpuPtr()->checkDpuSystemFinished();
+      }
       pkg->dataDynamic<upmem_sim::Dpu_message>(msg);
 
       tc->getCpuPtr()->sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));
+      return true;
     }
 
   } // namespace pseudo_inst

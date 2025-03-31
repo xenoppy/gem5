@@ -58,3 +58,12 @@ void dpu_launch(upmem_sim::dpu_launch_policy policy)
   m5_reserved1((void*)msg);
 
 }
+
+bool dpu_check(){
+
+  upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_CHECK_FINISHED,0,nullptr);
+  //printf("init ready to call m5_op, msg type %d\n",msg->type);
+  bool ret=m5_reserved1((void*)msg);
+  //printf("dpu_wait_finished: after m5_reserved1\n");
+  return ret;
+}

@@ -100,10 +100,14 @@ namespace gem5
   }
 
   TimingSimpleCPU::TimingSimpleCPU(const BaseTimingSimpleCPUParams &p)
-      : BaseSimpleCPU(p), fetchTranslation(this), icachePort(this), dpuPort(this),
+      : BaseSimpleCPU(p), fetchTranslation(this), icachePort(this),
+
         dcachePort(this), ifetch_pkt(NULL), dcache_pkt(NULL), previousCycle(0),
         fetchEvent([this]
                    { fetch(); }, name()),
+        //@PIM
+        dpuPort(this),
+        dpu_system(nullptr),
         dpuEvent([this]
                  { dpuEventProcess(); }, name())
   {
@@ -1316,39 +1320,29 @@ bool TimingSimpleCPU::DpuPort::recvTimingResp(PacketPtr pkt)
     }
     else
     {
-      printf("0\n");
       owner->dpu_system->fini();
-
-      printf("1\n");
       for (auto &option : owner->dpu_system->get_argument_parser()->options())
       {
-        printf("2\n");
         if (owner->dpu_system->get_argument_parser()->option_type(option) ==
             upmem_sim::util::ArgumentParser::INT)
         {
-          printf("3\n");
           std::cout << option << ": " << owner->dpu_system->get_argument_parser()->get_int_parameter(option)
                     << std::endl;
         }
         else if (owner->dpu_system->get_argument_parser()->option_type(option) ==
                  upmem_sim::util::ArgumentParser::STRING)
         {
-          printf("4\n");
           std::cout << option << ": "
                     << owner->dpu_system->get_argument_parser()->get_string_parameter(option) << std::endl;
         }
         else
         {
-          printf("5\n");
           throw std::invalid_argument("");
         }
       }
-      printf("6\n");
       upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
-      printf("7\n");
       for (auto &stat : system_stat_factory->stats())
       {
-        printf("8\n");
         std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
       }
     }

@@ -337,6 +337,17 @@ namespace gem5
         printf("dpuPort is not connected\n");
       return;
     }
+    //@PIM
+    bool checkDpuSystemFinished() override
+    {
+      if(dpu_system && dpu_system->is_finished())
+      {
+        // If dpu_system is not initialized, return false.
+        return true;
+      }
+      //schedule(waitDpuSystemFinishedEvent, curTick()+clockPeriod()*100); // Check every 100 ticks
+      return false;
+    }
 
   public:
     DrainState drain() override;

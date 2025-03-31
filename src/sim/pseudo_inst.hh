@@ -114,7 +114,7 @@ namespace gem5
     void togglesync(ThreadContext *tc);
     void triggerWorkloadEvent(ThreadContext *tc);
     //@PIM
-    void PIMtest(ThreadContext *tc, GuestAddr data);
+    bool PIMtest(ThreadContext *tc, GuestAddr data);
 
     /**
      * Execute a decoded M5 pseudo instruction
