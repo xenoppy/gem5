@@ -363,13 +363,10 @@ namespace gem5
     //@PIM
     bool pushSQ(upmem_sim::Dpu_message* msg) override
     {
-      printf("entering push\n");
       if(sq_->is_full(sq_head,doorbells_.sq_tail)){
-        printf("entering full\n");
         return false;
       }
       else {
-        printf("entering set\n");
         sq_->set((doorbells_.sq_tail),msg);
         doorbells_.sq_tail=(doorbells_.sq_tail+1) % sq_->get_size();
         return true;
@@ -389,25 +386,19 @@ namespace gem5
     }
 
     //@PIM
-
     bool submitSQ(upmem_sim::Dpu_message* msg) override
     {
-      printf("0\n");
       if(pushSQ(msg)){
-        printf("1\n");
         Request::Flags testflag(0);
         RequestPtr req = std::make_shared<Request>(0, 0, testflag, 0, 0, 0);
         gem5::PacketPtr pkg = Packet::createRead(req);
-        printf("2\n");
 
         size_t argc=1;
         upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
         argv_ptr[0] = new upmem_sim::message_data(sizeof(upmem_sim::Doorbells),(doorbellsGet()));
 
-        printf("3\n");
         upmem_sim::Dpu_message* doorbells_msg=new upmem_sim::Dpu_message(upmem_sim::DPU_DOORBELL, 1,argv_ptr);
         pkg->dataDynamic<upmem_sim::Dpu_message>(doorbells_msg);
-        printf("4\n");
         sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));
         return 0;
       }
