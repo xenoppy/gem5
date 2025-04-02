@@ -55,6 +55,8 @@ namespace gem5
 
   }
 
+
+
   Dpu::Dpu(const DpuParams &p) : SimObject(p)
   {
     printf("enter DPU\n");
@@ -78,8 +80,128 @@ namespace gem5
    printf("uPIM: startup called\n");
   }
 
-  void uPIM::process_rank_Cycle()
+
+  bool uPIM::address_message(upmem_sim::Dpu_message * msg)
   {
+    switch (msg->type){
+      case upmem_sim::DPU_INIT:
+        {
+          printf("uPIM: DPU_INIT received\n");
+          const char** argv= new const char*[msg->data_count];
+          for (size_t i = 0; i < msg->data_count; ++i) {
+            // Read the data from the message_data structure
+            // Convert to string
+            argv[i] = static_cast<const char*>(msg->data_ptrs[i]->data);
+            std::cout<<"m"<<"uPIM: argv["<<i<<"]: "<<argv[i]<<std::endl;
+          }
+          int argc = msg->data_count;
+          for(int i = 0; i < argc; i++) {
+            printf("uPIM: argv[%d]: %s\n", i, argv[i]);
+          }
+          upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
+          this->argument_parser = argument_parser;
+          argument_parser->parse(argc, argv);
+          this->system = new upmem_sim::simulator::System(argument_parser);
+
+          //owner->system->init();
+          printf("uPIM: DPU_INIT done\n");
+
+          break;
+        }
+      case upmem_sim::DPU_LOAD:
+        {
+          // Handle DPU_LOAD message
+          // Load binary or whatever is needed
+          printf("uPIM: DPU_LOAD received\n");
+          if (this->system != nullptr) {
+            // Assuming system has a method to load binary
+            // This is just a placeholder for actual loading logic
+            std::string binary(static_cast<const char*>(msg->data_ptrs[0]->data));
+            this->system->set_benchmark(binary); // Set the benchmark name
+            this->system->init();
+            printf("uPIM: Loading binary done: %s\n", binary.c_str());
+
+          } else {
+            printf("uPIM: System not initialized, cannot load binary\n");
+          }
+          break;
+        }
+      case upmem_sim::DPU_LAUNCH:
+        {
+          // Handle DPU_LAUNCH message
+          // Launch the DPU execution
+          printf("uPIM: DPU_LAUNCH received\n");
+          if (this->system != nullptr) {
+            if(this->system->is_benchmark_set != false){
+              // Assuming system has a method to launch execution
+              // This is just a placeholder for actual launch logic
+
+              std::memcpy(&(this->system->launch_policy), msg->data_ptrs[0]->data, sizeof(this->system->launch_policy));
+              printf("uPIM: Launching DPU with policy: %d\n", this->system->launch_policy);
+              this->start_working();
+
+            }
+            else{
+              printf("uPIM: Benchmark not set, cannot launch DPU\n");
+            }
+          } else {
+            printf("uPIM: System not initialized, cannot launch DPU\n");
+          }
+        }
+      case upmem_sim::DPU_UPDATE:
+        {
+          // Handle DPU_UPDATE message
+          // Update the DPU state or whatever is needed
+          printf("uPIM: DPU_UPDATE received\n");
+          if (this->system != nullptr) {
+            //Not elegant at all...
+            this->system=reinterpret_cast<upmem_sim::simulator::System *>(const_cast<void *>(msg->data_ptrs[0]->data));
+            printf("uPIM: DPU state updated\n");
+
+          } else {
+            printf("uPIM: System not initialized, cannot update DPU\n");
+          }
+          break;
+        }
+      case upmem_sim::DPU_INIT_ASYNCHRONOUS:
+        {
+          printf("uPIM: DPU_INIT_ASYNCHRONOUS received\n");
+          RingBuffer<upmem_sim::Dpu_message*>* tmp_sq,* tmp_cq;
+          upmem_sim::Doorbells tmp_doorbells;
+          std::memcpy(&tmp_sq, msg->data_ptrs[0]->data, sizeof(this->sq_));
+          std::memcpy(&tmp_cq, msg->data_ptrs[1]->data, sizeof(this->cq_));
+          std::memcpy(&tmp_doorbells, msg->data_ptrs[2]->data, sizeof(this->doorbells_));
+          this->setSQ(tmp_sq);
+          this->setCQ(tmp_cq);
+          this->doorbellsUpdate(&tmp_doorbells);
+          printf("uPIM: DPU_INIT_ASYNCHRONOUS: sq, cq, doorbells init done\n");
+          this->check_message_Cycle();
+          printf("uPIM: DPU_INIT_ASYNCHRONOUS done\n");
+          break;
+        }
+      case upmem_sim::DPU_DOORBELL:
+        {
+          // Handle DPU_DOORBELL message
+          printf("uPIM: DPU_DOORBELL received\n");
+
+          std::memcpy(&(this->doorbells_), msg->data_ptrs[0]->data, sizeof(this->doorbells_));
+          printf("uPIM: DPU_DOORBELL updated: sq_tail=%zu, cq_head=%zu\n", this->doorbells_.sq_tail, this->doorbells_.cq_head);
+          break;
+        }
+      default:
+      {
+        // Handle unknown message type
+        printf("uPIM: Unknown message type received: %d\n", msg->type);
+        exit(2);
+      }
+    }
+    return true;
+
+
+  }
+
+  void uPIM::process_rank_Cycle()
+{
     //printf("%s: enter process_rank_Cycle\n", this->name().c_str());
     if(system != nullptr && system->is_benchmark_set)
     {
@@ -203,128 +325,18 @@ namespace gem5
     upmem_sim::Dpu_message* msg = reinterpret_cast<upmem_sim::Dpu_message *>(pkt->getPtr<uint8_t>());
     printf("uPIM: pkg received. \n");
     printf("uPIM: msg type: %d\n", msg->type);
-    switch (msg->type){
-      case upmem_sim::DPU_INIT:
-        {
-          printf("uPIM: DPU_INIT received\n");
-          const char** argv= new const char*[msg->data_count];
-          for (size_t i = 0; i < msg->data_count; ++i) {
-            // Read the data from the message_data structure
-            // Convert to string
-            argv[i] = static_cast<const char*>(msg->data_ptrs[i]->data);
-            std::cout<<"m"<<"uPIM: argv["<<i<<"]: "<<argv[i]<<std::endl;
-          }
-          int argc = msg->data_count;
-          for(int i = 0; i < argc; i++) {
-            printf("uPIM: argv[%d]: %s\n", i, argv[i]);
-          }
-          upmem_sim::util::ArgumentParser* argument_parser = upmem_sim::init_argument_parser();
-          owner->argument_parser = argument_parser;
-          argument_parser->parse(argc, argv);
-          owner->system = new upmem_sim::simulator::System(argument_parser);
-
-         //owner->system->init();
-          printf("uPIM: DPU_INIT done\n");
-
-          break;
-        }
-      case upmem_sim::DPU_LOAD:
-        {
-          // Handle DPU_LOAD message
-          // Load binary or whatever is needed
-          printf("uPIM: DPU_LOAD received\n");
-          if (owner->system != nullptr) {
-            // Assuming system has a method to load binary
-            // This is just a placeholder for actual loading logic
-            std::string binary(static_cast<const char*>(msg->data_ptrs[0]->data));
-            owner->system->set_benchmark(binary); // Set the benchmark name
-            owner->system->init();
-            printf("uPIM: Loading binary done: %s\n", binary.c_str());
-
-          } else {
-            printf("uPIM: System not initialized, cannot load binary\n");
-          }
-          break;
-        }
-      case upmem_sim::DPU_LAUNCH:
-        {
-          // Handle DPU_LAUNCH message
-          // Launch the DPU execution
-          printf("uPIM: DPU_LAUNCH received\n");
-          if (owner->system != nullptr) {
-            if(owner->system->is_benchmark_set != false){
-              // Assuming system has a method to launch execution
-              // This is just a placeholder for actual launch logic
-
-              std::memcpy(&(owner->system->launch_policy), msg->data_ptrs[0]->data, sizeof(owner->system->launch_policy));
-              printf("uPIM: Launching DPU with policy: %d\n", owner->system->launch_policy);
-              owner->start_working();
-
-            }
-            else{
-              printf("uPIM: Benchmark not set, cannot launch DPU\n");
-            }
-          } else {
-            printf("uPIM: System not initialized, cannot launch DPU\n");
-          }
-          //only after dpu workdone, then is_finished will be set to true
-          return false;
-        }
-      case upmem_sim::DPU_UPDATE:
-        {
-          // Handle DPU_UPDATE message
-          // Update the DPU state or whatever is needed
-          printf("uPIM: DPU_UPDATE received\n");
-          if (owner->system != nullptr) {
-            //Not elegant at all...
-            owner->system=reinterpret_cast<upmem_sim::simulator::System *>(const_cast<void *>(msg->data_ptrs[0]->data));
-            printf("uPIM: DPU state updated\n");
-
-          } else {
-            printf("uPIM: System not initialized, cannot update DPU\n");
-          }
-          break;
-        }
-      case upmem_sim::DPU_INIT_ASYNCHRONOUS:
-        {
-          printf("uPIM: DPU_INIT_ASYNCHRONOUS received\n");
-          RingBuffer<upmem_sim::Dpu_message*>* tmp_sq,* tmp_cq;
-          upmem_sim::Doorbells tmp_doorbells;
-          std::memcpy(&tmp_sq, msg->data_ptrs[0]->data, sizeof(owner->sq_));
-          std::memcpy(&tmp_cq, msg->data_ptrs[1]->data, sizeof(owner->cq_));
-          std::memcpy(&tmp_doorbells, msg->data_ptrs[2]->data, sizeof(owner->doorbells_));
-          owner->setSQ(tmp_sq);
-          owner->setCQ(tmp_cq);
-          owner->doorbellsUpdate(&tmp_doorbells);
-          printf("uPIM: DPU_INIT_ASYNCHRONOUS: sq, cq, doorbells init done\n");
-          owner->check_message_Cycle();
-          printf("uPIM: DPU_INIT_ASYNCHRONOUS done\n");
-          break;
-        }
-      case upmem_sim::DPU_DOORBELL:
-        {
-          // Handle DPU_DOORBELL message
-          printf("uPIM: DPU_DOORBELL received\n");
-
-          std::memcpy(&(owner->doorbells_), msg->data_ptrs[0]->data, sizeof(owner->doorbells_));
-          printf("uPIM: DPU_DOORBELL updated: sq_tail=%zu, cq_head=%zu\n", owner->doorbells_.sq_tail, owner->doorbells_.cq_head);
-          break;
-        }
-      default:
-      {
-        // Handle unknown message type
-        printf("uPIM: Unknown message type received: %d\n", msg->type);
-        exit(2);
-      }
+    //address message
+    owner->address_message(msg);
+    //For DPU_LAUNCH, only after dpu workdone, then is_finished will be set to true
+    if(msg->type!=upmem_sim::DPU_LAUNCH){
+      PacketPtr resp_pkt = make_pkt();
+      upmem_sim::Dpu_message* resp_msg = new upmem_sim::Dpu_message(upmem_sim::DPU_FINISHED,0,nullptr);
+      resp_pkt->dataDynamic<upmem_sim::Dpu_message>(resp_msg);
+      resp_pkt->makeTimingResponse();
+      sendTimingResp(resp_pkt);
+      printf("Message addressed done\n");
+      return false;
     }
-    //response
-    PacketPtr resp_pkt = make_pkt();
-    upmem_sim::Dpu_message* resp_msg = new upmem_sim::Dpu_message(upmem_sim::DPU_FINISHED,0,nullptr);
-    resp_pkt->dataDynamic<upmem_sim::Dpu_message>(resp_msg);
-    resp_pkt->makeTimingResponse();
-    sendTimingResp(resp_pkt);
-    printf("Message addressed done\n");
-    return false;
   }
 
   void

@@ -112,6 +112,8 @@ namespace gem5
     upmem_sim::util::ArgumentParser *argument_parser;
     upmem_sim::simulator::System *system;
 
+    bool address_message(upmem_sim::Dpu_message* msg);
+
     void process_rank_Cycle();
     EventFunctionWrapper rank_cycle_event;
     void check_message_Cycle();
