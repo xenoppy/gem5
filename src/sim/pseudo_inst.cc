@@ -75,9 +75,19 @@
 #include "pim/uPIM.hh"
 #include "pim/uPIMulator_backend/src/external.hh"
 #include "pim/dpu_message.hh"
+#include "pim/ring_buffer.hh"
 
 namespace gem5
 {
+
+  inline PacketPtr make_pkt()
+  {
+    Request::Flags testflag(0);
+    RequestPtr req = std::make_shared<Request>(
+        0, 0, testflag, 0, 0, 0);
+    return Packet::createRead(req);
+
+  }
 
   using namespace statistics;
 
@@ -631,9 +641,9 @@ namespace gem5
     }
 
     //@PIM
-    uint64_t PIMtest(ThreadContext *tc, GuestAddr data)
+    uint64_t dpu_message_sync(ThreadContext *tc, GuestAddr data)
     {
-      //printf("pseudo_inst::PIMtest()\n");
+      //printf("pseudo_inst::dpu_message_sync()\n");
       gem5::Request::Flags testflag(0);
       gem5::RequestPtr req = std::make_shared<gem5::Request>(
           0, 0, testflag, 0, 0, 0);
@@ -675,6 +685,65 @@ namespace gem5
       tc->getCpuPtr()->setDpuSystemFinished(false);
       tc->getCpuPtr()->sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));
       return 1;
+    }
+
+    uint64_t dpu_message_async(ThreadContext *tc, GuestAddr data)
+    {
+      //read data array from simulated memory
+      TranslatingPortProxy fs_proxy(tc);
+      SETranslatingPortProxy se_proxy(tc);
+      PortProxy &virt_proxy = FullSystem ? fs_proxy : se_proxy;
+      upmem_sim::Dpu_message* msg=(upmem_sim::Dpu_message*)malloc(sizeof(upmem_sim::Dpu_message));
+      virt_proxy.readBlob(data.addr, msg, sizeof(upmem_sim::Dpu_message));
+      switch(msg->type){
+        case upmem_sim::DPU_INIT_ASYNCHRONOUS:
+        {
+          //ringbuffer depth: 16
+          RingBuffer<upmem_sim::Dpu_message*>* sq= new RingBuffer<upmem_sim::Dpu_message*>(SQ_SIZE);
+          RingBuffer<upmem_sim::Dpu_message*>* cq= new RingBuffer<upmem_sim::Dpu_message*>(CQ_SIZE);
+          tc->getCpuPtr()->setSQ(sq);
+          tc->getCpuPtr()->setCQ(cq);
+          tc->getCpuPtr()->doorbellsUpdate(new upmem_sim::Doorbells);
+
+          size_t argc=3;
+          upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+          argv_ptr[0] = new upmem_sim::message_data(sizeof(sq),&sq);
+          argv_ptr[1] = new upmem_sim::message_data(sizeof(cq),&cq);
+          argv_ptr[2] = new upmem_sim::message_data(sizeof(upmem_sim::Doorbells),(tc->getCpuPtr()->doorbellsGet()));
+
+          upmem_sim::Dpu_message* init_msg=new upmem_sim::Dpu_message(upmem_sim::DPU_INIT_ASYNCHRONOUS, argc,argv_ptr);
+
+
+          //send packet to DPU for initialization
+          gem5::PacketPtr pkg = make_pkt();
+          pkg->dataDynamic<upmem_sim::Dpu_message>(init_msg);
+          tc->getCpuPtr()->sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));
+          break;
+        }
+       default:
+          break;
+      }
+
+      upmem_sim::message_data** data_ptrs_buffer = (upmem_sim::message_data**)malloc((msg->data_count) * sizeof(upmem_sim::message_data*));
+      virt_proxy.readBlob((Addr)(msg->data_ptrs), data_ptrs_buffer, sizeof(upmem_sim::message_data*)* msg->data_count);
+      msg->data_ptrs = (upmem_sim::message_data**)malloc((msg->data_count) * sizeof(upmem_sim::message_data*));
+
+      for(size_t i=0;i<msg->data_count;i++){
+        // read each message_data from the data_ptr array
+        upmem_sim::message_data* data_ptr = (upmem_sim::message_data*)malloc(sizeof(upmem_sim::message_data));
+        virt_proxy.readBlob((Addr)(data_ptrs_buffer[i]), data_ptr, sizeof(upmem_sim::message_data));
+        void* data_buffer = malloc(data_ptr->size);
+
+        virt_proxy.readBlob((Addr)(data_ptr->data), data_buffer, data_ptr->size);
+        data_ptr->data = data_buffer; // point to the actual data buffer
+        msg->data_ptrs[i] = data_ptr; // store the pointer to the message_data
+      }
+      //put the message into the SQ
+      tc->getCpuPtr()->submitSQ(msg);
+      printf("submitSQ done\n");
+
+      return 1;
+
     }
 
   } // namespace pseudo_inst

@@ -6,7 +6,7 @@
 int main()
 {
   printf("\ntest begin\n");
-  m5_reserved1();
+  m5_dpu_message_sync();
   int b = 0, c = 2;
   while (1)
   {

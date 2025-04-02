@@ -50,13 +50,72 @@ namespace gem5
 
   class uPIM : public Dpu
   {
+  protected:
+
+    void setSQ(RingBuffer<upmem_sim::Dpu_message*>* sq)
+    {
+      sq_=sq;
+      return;
+    }
+    void setCQ(RingBuffer<upmem_sim::Dpu_message*>* cq)
+    {
+      cq_=cq;
+      return;
+    }
+
+    bool pushCQ(upmem_sim::Dpu_message* msg)
+    {
+      if(cq_->is_full(doorbells_.cq_head,cq_tail))
+        return false;
+      else {
+        sq_->set((cq_tail),msg);
+        cq_tail=(cq_tail+1) % cq_->get_size();
+        return true;
+      }
+    }
+    upmem_sim::Dpu_message* popSQ()
+    {
+      if(sq_->is_empty(sq_head,doorbells_.sq_tail))
+        return nullptr;
+      else {
+        upmem_sim::Dpu_message* msg;
+        sq_->get(sq_head,msg);
+        sq_head=(sq_head+1) % sq_->get_size();
+        return msg;
+      }
+    }
+
+
+    bool submitCQ(upmem_sim::Dpu_message* msg)
+    {
+      if(pushCQ(msg))
+      {
+        return true;
+      }
+      else {
+        return false;
+      }
+
+    }
+
+    //@PIM
+    void doorbellsUpdate(upmem_sim::Doorbells* doorbells)
+    {
+      doorbells_=*doorbells;
+      return;
+    }
+
   private:
-    std::atomic<size_t> CQ_head, SQ_tail;
+    RingBuffer<upmem_sim::Dpu_message*>* sq_,* cq_;
+    size_t cq_tail, sq_head;
+    upmem_sim::Doorbells doorbells_;
     upmem_sim::util::ArgumentParser *argument_parser;
     upmem_sim::simulator::System *system;
 
     void process_rank_Cycle();
     EventFunctionWrapper rank_cycle_event;
+    void check_message_Cycle();
+    EventFunctionWrapper message_cycle_event;
     const Tick rank_clock, cpu_clock;
 
     class CPUSidePort : public ResponsePort

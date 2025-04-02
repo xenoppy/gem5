@@ -5,7 +5,6 @@
 #include "basic.hh"
 #include "../include/gem5/m5ops.h"
 
-#include "byte_stream.h"
 
 
 
@@ -25,7 +24,7 @@ void dpu_init(int nr_tasklets, char *bindir, char *logdir){
 
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_INIT,args.size(),argv_ptr);
   //printf("init ready to call m5_op, msg type %d\n",msg->type);
-  size_t ret = m5_reserved1((void*)msg); // Call m5_op to send the message to the simulator
+  size_t ret = m5_dpu_message_sync((void*)msg); // Call m5_op to send the message to the simulator
 
   //wait for the simulator to finish
   while(!dpu_check()){
@@ -45,7 +44,7 @@ void dpu_load(std::string binary_path)
   argv_ptr[0] = new upmem_sim::message_data(binary_path.size()+1,binary_path.c_str());
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_LOAD,argc,argv_ptr);
   //printf("load ready to call m5_op, msg type %d\n",msg->type);
-  size_t ret = m5_reserved1((void*)msg); // Call m5_op to send the message to the simulator
+  size_t ret = m5_dpu_message_sync((void*)msg); // Call m5_op to send the message to the simulator
 
   while(!dpu_check()){
   }
@@ -64,7 +63,7 @@ void dpu_launch(upmem_sim::dpu_launch_policy policy)
   argv_ptr[0] = new upmem_sim::message_data(sizeof(upmem_sim::dpu_launch_policy),&policy);
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_LAUNCH,argc,argv_ptr);
   //printf("init ready to call m5_op, msg type %d\n",msg->type);
-  size_t ret = m5_reserved1((void*)msg); // Call m5_op to send the message to the simulator
+  size_t ret = m5_dpu_message_sync((void*)msg); // Call m5_op to send the message to the simulator
 
   while(!dpu_check()){
   }
@@ -74,12 +73,12 @@ void dpu_launch(upmem_sim::dpu_launch_policy policy)
 bool dpu_check(){
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_CHECK_FINISHED,0,nullptr);
   //printf("init ready to call m5_op, msg type %d\n",msg->type);
-  size_t  ret=m5_reserved1((void*)msg);
-  //std::cout<<"dpu_check: m5_reserved1 returned: " << ret << std::endl;
+  size_t  ret=m5_dpu_message_sync((void*)msg);
+  //std::cout<<"dpu_check: m5_dpu_message_sync returned: " << ret << std::endl;
   if(ret){
     printf("dpu_check: DPU_CHECK_FINISHED returned true\n");
   }
-  //printf("dpu_wait_finished: after m5_reserved1\n");
+  //printf("dpu_wait_finished: after m5_dpu_message_sync\n");
   return ret;
 }
 
@@ -87,8 +86,7 @@ bool dpu_check(){
 
 void dpu_init_asynchronous(int nr_tasklets, char *bindir, char *logdir){
 
-  //same as dpu_init
-  printf("entering dpu_init_asynchronous\n");
+  //same as dpu_initprintf("entering dpu_init\n");
   std::vector<std::string> args={
     "./src/PIMulator",   // argv[0]: simulator name
     "--num_tasklets",  std::to_string(nr_tasklets),
@@ -100,10 +98,12 @@ void dpu_init_asynchronous(int nr_tasklets, char *bindir, char *logdir){
     // Convert std::string to char* for the DPU message
     argv_ptr[i] = new upmem_sim::message_data(args[i].size()+1,args[i].c_str());
   }
-  //using DPU_INIT_ASYNCHRONOUS
+
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_INIT_ASYNCHRONOUS,args.size(),argv_ptr);
-  printf("init ready to call m5_op, msg type %d\n",msg->type);
-  size_t ret = m5_reserved1((void*)msg); // Call m5_op to send the message to the simulator
+  //printf("init ready to call m5_op, msg type %d\n",msg->type);
+  size_t ret = m5_dpu_message_async((void*)msg); // Call m5_op to send the message to the simulator
+
+  return;
 
 }
 void dpu_load_asynchronous(std::string binary_path){
@@ -117,6 +117,19 @@ void dpu_load_asynchronous(std::string binary_path){
   //using DPU_LOAD_ASYNCHRONOUS
   upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_LOAD_ASYNCHRONOUS,argc,argv_ptr);
   printf("load ready to call m5_op, msg type %d\n",msg->type);
-  size_t ret = m5_reserved1((void*)msg); // Call m5_op to send the message to the simulator
+  size_t ret = m5_dpu_message_async((void*)msg); // Call m5_op to send the message to the simulator
 
+}
+
+
+void dpu_launch_asynchronous(upmem_sim::dpu_launch_policy policy)
+{
+  printf("entering dpu_launch\n");
+  size_t argc=1;
+  upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+  argv_ptr[0] = new upmem_sim::message_data(sizeof(upmem_sim::dpu_launch_policy),&policy);
+  upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_LAUNCH_ASYNCHRONOUS,argc,argv_ptr);
+  //printf("init ready to call m5_op, msg type %d\n",msg->type);
+  size_t ret = m5_dpu_message_async((void*)msg); // Call m5_op to send the message to the simulator
+  printf("dpu_launch finished\n");
 }

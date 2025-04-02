@@ -119,7 +119,8 @@ namespace gem5
         dpuPort(this),
         dpu_system(nullptr),
         dpuEvent([this]
-                 { dpuEventProcess(); }, name())
+                 { dpuEventProcess(); }, name()),
+        sq_(nullptr), cq_(nullptr), sq_head(0), cq_tail(0)
   {
     _status = Idle;
   }

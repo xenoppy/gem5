@@ -46,7 +46,7 @@ namespace gem5
     return new upmem_sim::Dpu_message(type, argc,argv_ptr);
   }
 
-  PacketPtr make_pkt()
+  inline PacketPtr make_pkt()
   {
     Request::Flags testflag(0);
     RequestPtr req = std::make_shared<Request>(
@@ -63,8 +63,12 @@ namespace gem5
   uPIM::uPIM(const uPIMParams &p) : Dpu(p), cpu_clock(p.cpu_clock), rank_clock(p.rank_clock),
                                     rank_cycle_event([this]
                                                      { process_rank_Cycle(); }, name()),
+                                    message_cycle_event([this]
+                                                     { check_message_Cycle(); }, name()),
                                     cpusidePort(name() + ".cpu_side", this),
-                                    system(nullptr)
+                                    system(nullptr),
+                                    sq_(nullptr), cq_(nullptr),
+                                    cq_tail(0), sq_head(0)
   {
     printf("enter uPIM\n");
   }
@@ -118,6 +122,21 @@ namespace gem5
     }
   }
 
+  void uPIM:: check_message_Cycle(){
+    printf("%s: enter check_message_Cycle\n", this->name().c_str());
+    assert(sq_ != nullptr);
+    assert(cq_ != nullptr);
+    if(sq_->is_empty(sq_head,doorbells_.sq_tail)){
+      //dpu idle
+      schedule(message_cycle_event, curTick() + rank_clock*1000);
+    }
+    else{
+      printf("uPIM: sq is not empty, sq_head: %ld, sq_tail: %ld\n", sq_head, doorbells_.sq_tail);
+      upmem_sim::Dpu_message* sq_msg;
+      sq_->get(sq_head,sq_msg);
+    }
+
+  }
   Port &
   uPIM::getPort(const std::string &if_name, PortID idx)
   {
@@ -266,13 +285,37 @@ namespace gem5
           }
           break;
         }
-
-      default:
+      case upmem_sim::DPU_INIT_ASYNCHRONOUS:
         {
-          // Handle unknown message type
-          printf("uPIM: Unknown message type received: %d\n", msg->type);
-          exit(2);
+          printf("uPIM: DPU_INIT_ASYNCHRONOUS received\n");
+          RingBuffer<upmem_sim::Dpu_message*>* tmp_sq,* tmp_cq;
+          upmem_sim::Doorbells tmp_doorbells;
+          std::memcpy(&tmp_sq, msg->data_ptrs[0]->data, sizeof(owner->sq_));
+          std::memcpy(&tmp_cq, msg->data_ptrs[1]->data, sizeof(owner->cq_));
+          std::memcpy(&tmp_doorbells, msg->data_ptrs[2]->data, sizeof(owner->doorbells_));
+          owner->setSQ(tmp_sq);
+          owner->setCQ(tmp_cq);
+          owner->doorbellsUpdate(&tmp_doorbells);
+          printf("uPIM: DPU_INIT_ASYNCHRONOUS: sq, cq, doorbells init done\n");
+          owner->check_message_Cycle();
+          printf("uPIM: DPU_INIT_ASYNCHRONOUS done\n");
+          break;
         }
+      case upmem_sim::DPU_DOORBELL:
+        {
+          // Handle DPU_DOORBELL message
+          printf("uPIM: DPU_DOORBELL received\n");
+
+          std::memcpy(&(owner->doorbells_), msg->data_ptrs[0]->data, sizeof(owner->doorbells_));
+          printf("uPIM: DPU_DOORBELL updated: sq_tail=%zu, cq_head=%zu\n", owner->doorbells_.sq_tail, owner->doorbells_.cq_head);
+          break;
+        }
+      default:
+      {
+        // Handle unknown message type
+        printf("uPIM: Unknown message type received: %d\n", msg->type);
+        exit(2);
+      }
     }
     //response
     PacketPtr resp_pkt = make_pkt();

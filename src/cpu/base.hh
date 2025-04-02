@@ -59,6 +59,7 @@
 #include "sim/signal.hh"
 #include "sim/system.hh"
 
+#include "pim/dpu_message.hh"
 namespace gem5
 {
 
@@ -165,8 +166,8 @@ namespace gem5
     SignalSinkPort<bool> modelResetPort;
 
     //@PIM
-    //note: only for chronous
-    bool is_dpu_finished;
+    bool is_dpu_finished;    //note: only for chronous
+    upmem_sim::Doorbells doorbells_;
 
   public:
     /**
@@ -189,6 +190,15 @@ namespace gem5
     virtual void sendPacketToDpu(PacketPtr data) {printf("virtual func not implemented\n");exit(1);}
     virtual bool checkDpuSystemFinished(){printf("virtual func not implemented\n");exit(1);  }
     virtual void setDpuSystemFinished(bool finished){printf("virtual func not implemented\n");exit(1); }
+    virtual void setSQ(RingBuffer<upmem_sim::Dpu_message*>* sq_){printf("virtual func not implemented\n");exit(1); }
+    virtual void setCQ(RingBuffer<upmem_sim::Dpu_message*>* cq_){printf("virtual func not implemented\n");exit(1); }
+    virtual bool pushSQ(upmem_sim::Dpu_message* msg){printf("virtual func not implemented\n");exit(1); }
+    virtual upmem_sim::Dpu_message* popCQ(){printf("virtual func not implemented\n");exit(1); }
+    virtual bool submitSQ(upmem_sim::Dpu_message* msg){printf("virtual func not implemented\n");exit(1); }
+    virtual void doorbellsUpdate(upmem_sim::Doorbells* doorbells_){printf("virtual func not implemented\n");exit(1); }
+    virtual upmem_sim::Doorbells* doorbellsAddSqTail (){printf("virtual func not implemented\n");exit(1); }
+    virtual upmem_sim::Doorbells* doorbellsAddCqHead (){printf("virtual func not implemented\n");exit(1); }
+    virtual upmem_sim::Doorbells* doorbellsGet (){printf("virtual func not implemented\n");exit(1); }
     /** Reads this CPU's ID. */
     int cpuId() const { return _cpuId; }
 

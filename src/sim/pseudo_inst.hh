@@ -114,7 +114,8 @@ namespace gem5
     void togglesync(ThreadContext *tc);
     void triggerWorkloadEvent(ThreadContext *tc);
     //@PIM
-    uint64_t PIMtest(ThreadContext *tc, GuestAddr data);
+    uint64_t dpu_message_sync(ThreadContext *tc, GuestAddr data);
+    uint64_t dpu_message_async(ThreadContext *tc, GuestAddr data);
 
     /**
      * Execute a decoded M5 pseudo instruction
@@ -236,9 +237,11 @@ namespace gem5
         return true;
         //@PIM
       case M5OP_RESERVED1:
-        result = invokeSimcall<ABI,store_ret>(tc, PIMtest);
+        result = invokeSimcall<ABI,store_ret>(tc, dpu_message_sync);
         return true;
       case M5OP_RESERVED2:
+        result = invokeSimcall<ABI,store_ret>(tc, dpu_message_async);
+        return true;
       case M5OP_RESERVED3:
       case M5OP_RESERVED4:
       case M5OP_RESERVED5:
