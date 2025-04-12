@@ -56,7 +56,7 @@ system.clk_domain.voltage_domain = VoltageDomain()
 system.mem_mode = "timing"  # Use timing accesses
 system.mem_ranges = [AddrRange("512MB")]  # Create an address range
 # @PIM
-system.dpu = uPIM(cpu_clock="2us", rank_clock="3us")
+system.dpu = uPIM(cpu_clock="2.86ns", rank_clock="2.86ns")
 # Create a simple CPU
 # You can use ISA-specific CPU models for different workloads:
 # `RiscvTimingSimpleCPU`, `ArmTimingSimpleCPU`.
