@@ -45,9 +45,9 @@ namespace upmem_sim::simulator
   // 看上去是把bin扔到dpu的IRAM，DRAM，WRAM，MRAM里面
   void System::init()
   {
-    cpu_->init();
-    cpu_->sched(execuion_);
-    cpu_->launch();
+    cpu_->init();//simulate `dpu_load`, load the binary into iram, mram, wram, atomic
+    cpu_->sched(execuion_);//simulate input transfer, transfer the input data to dpu's mram and wram
+    cpu_->launch();// simulate `dpu_launch`, launch the dpu
   }
   void System::cpu_cycle()
   {
