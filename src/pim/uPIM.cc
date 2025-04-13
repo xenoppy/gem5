@@ -28,7 +28,6 @@
 
 #include "pim/uPIM.hh"
 #include "pim/uPIMulator_backend/src/external.hh"
-#include "pim/uPIM.hh"
 #include "pim/dpu_message.hh"
 
 
