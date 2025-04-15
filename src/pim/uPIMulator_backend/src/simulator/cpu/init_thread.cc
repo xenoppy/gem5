@@ -31,6 +31,14 @@ void InitThread::dma_transfer_to_atomic() {
   for (auto &dpu : rank_->dpus()) {
     dpu->dma()->transfer_to_atomic(util::ConfigLoader::atomic_offset(),
                                    byte_stream);
+    if (byte_stream != nullptr) {
+      auto rank_message = new rank::RankMessage(
+          rank::RankMessage::WRITE, dpu->dpu_id(),
+          sys_used_mram_end_pointer(),//TODO: should be atomic address
+          byte_stream->size(), byte_stream);
+      rank_->write(rank_message);
+      rank_->insert_mem_message(rank_message);
+    }
   }
   delete byte_stream;
 
@@ -42,9 +50,17 @@ void InitThread::dma_transfer_to_iram() {
   for (auto &dpu : rank_->dpus()) {
     dpu->dma()->transfer_to_iram(util::ConfigLoader::iram_offset(),
                                  byte_stream);
+
+    if (byte_stream != nullptr) {
+      auto rank_message = new rank::RankMessage(
+          rank::RankMessage::WRITE, dpu->dpu_id(),
+          sys_used_mram_end_pointer(),//TODO: should be iram address
+          byte_stream->size(), byte_stream);
+      rank_->write(rank_message);
+      rank_->insert_mem_message(rank_message);
+    }
   }
   delete byte_stream;
-
   std::cout << "DMA to IRAM completed..." << std::endl;
 }
 
@@ -53,6 +69,14 @@ void InitThread::dma_transfer_to_wram() {
   for (auto &dpu : rank_->dpus()) {
     dpu->dma()->transfer_to_wram(util::ConfigLoader::wram_offset(),
                                  byte_stream);
+    if (byte_stream != nullptr) {
+      auto rank_message = new rank::RankMessage(
+          rank::RankMessage::WRITE, dpu->dpu_id(),
+          sys_used_mram_end_pointer(),//TODO: should be wram address
+          byte_stream->size(), byte_stream);
+      rank_->write(rank_message);
+      rank_->insert_mem_message(rank_message);
+    }
   }
   delete byte_stream;
 
@@ -64,6 +88,15 @@ void InitThread::dma_transfer_to_mram() {
   for (auto &dpu : rank_->dpus()) {
     dpu->dma()->transfer_to_mram(util::ConfigLoader::mram_offset(),
                                  byte_stream);
+
+    if (byte_stream != nullptr) {
+      auto rank_message = new rank::RankMessage(
+          rank::RankMessage::WRITE, dpu->dpu_id(),
+          sys_used_mram_end_pointer(),//TODO: should be exact mram address
+          byte_stream->size(), byte_stream);
+      rank_->write(rank_message);
+      rank_->insert_mem_message(rank_message);
+    }
   }
   delete byte_stream;
 

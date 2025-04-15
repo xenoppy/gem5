@@ -673,14 +673,33 @@ namespace gem5
 
       //read done
 
-      //printf("msg type %d\n",msg->type);
-      if(msg->type==upmem_sim::DPU_CHECK_FINISHED){
-        bool ret=tc->getCpuPtr()->checkDpuSystemFinished();
+      //address check message
+      bool ret=false;
+      if(msg->type==upmem_sim::DPU_CHECK){
+        upmem_sim::dpu_check_target check_target=*(upmem_sim::dpu_check_target*)msg->data_ptrs[0]->data;
+        switch(check_target){
+          case upmem_sim::DPU_CHECK_INIT:
+            ret=tc->getCpuPtr()->check_uPIM_init_done();
+            break;
+          case upmem_sim::DPU_CHECK_MEM:
+            ret=tc->getCpuPtr()->check_uPIM_mem_done();
+            break;
+          case upmem_sim::DPU_CHECK_GROUP:
+          //TODO
+            break;
+          case upmem_sim::DPU_CHECK_ALL:
+            ret=tc->getCpuPtr()->check_uPIM_all_finished();
+            break;
+          default:
+            break;
+        }
         if(ret){
           return 1;
         }
         return 0;
       }
+
+      //send other message to uPIM
       pkg->dataDynamic<upmem_sim::Dpu_message>(msg);
       tc->getCpuPtr()->setDpuSystemFinished(false);
       tc->getCpuPtr()->sendPacketToDpu(static_cast<gem5::PacketPtr>(pkg));

@@ -1322,49 +1322,53 @@ bool TimingSimpleCPU::DpuPort::recvTimingResp(PacketPtr pkt)
         printf("DpuPort: recvTimingResp DPU_FINISHED\n");
         owner->is_dpu_finished = true;
         break;
-      case upmem_sim::DPU_UPDATE_SYSTEM:
+      case upmem_sim::DPU_UPDATE_SYSTEM://should recv this right after DPU_INIT
+
         printf("DpuPort: recvTimingResp DPU_UPDATE_SYSTEM\n");
         owner->dpu_system = reinterpret_cast<upmem_sim::simulator::System *>(const_cast<void*>(msg->data_ptrs[0]->data));
-        if (not owner->dpu_system->is_finished())
-        {
-          if(owner->dpu_system->is_zombie())
-          {
-            owner->dpu_system->cpu_check_cycle();
-            sendMsgbyTimingReq(makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE,
-              sizeof(upmem_sim::simulator::System*),
-              (owner->dpu_system))
-            );
-          }
-        }
-        else
-        {
-          owner->dpu_system->fini();
-          for (auto &option : owner->dpu_system->get_argument_parser()->options())
-          {
-            if (owner->dpu_system->get_argument_parser()->option_type(option) ==
-                upmem_sim::util::ArgumentParser::INT)
-            {
-              std::cout << option << ": " << owner->dpu_system->get_argument_parser()->get_int_parameter(option)
-                        << std::endl;
-            }
-            else if (owner->dpu_system->get_argument_parser()->option_type(option) ==
-                    upmem_sim::util::ArgumentParser::STRING)
-            {
-              std::cout << option << ": "
-                        << owner->dpu_system->get_argument_parser()->get_string_parameter(option) << std::endl;
-            }
-            else
-            {
-              throw std::invalid_argument("");
-            }
-          }
-          upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
-          for (auto &stat : system_stat_factory->stats())
-          {
-            std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
-          }
-          owner->is_dpu_finished = true;
-        }
+        owner->set_uPIM_init_done(true);
+        break;
+        //TODO: following is CPU_check_DPU, should be wrapped into an event
+        // if (not owner->dpu_system->is_finished())
+        // {
+        //   if(owner->dpu_system->is_zombie())
+        //   {
+        //     owner->dpu_system->cpu_check_cycle();
+        //     sendMsgbyTimingReq(makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE,
+        //       sizeof(upmem_sim::simulator::System*),
+        //       (owner->dpu_system))
+        //     );
+        //   }
+        // }
+        // else
+        // {
+        //   owner->dpu_system->fini();
+        //   for (auto &option : owner->dpu_system->get_argument_parser()->options())
+        //   {
+        //     if (owner->dpu_system->get_argument_parser()->option_type(option) ==
+        //         upmem_sim::util::ArgumentParser::INT)
+        //     {
+        //       std::cout << option << ": " << owner->dpu_system->get_argument_parser()->get_int_parameter(option)
+        //                 << std::endl;
+        //     }
+        //     else if (owner->dpu_system->get_argument_parser()->option_type(option) ==
+        //             upmem_sim::util::ArgumentParser::STRING)
+        //     {
+        //       std::cout << option << ": "
+        //                 << owner->dpu_system->get_argument_parser()->get_string_parameter(option) << std::endl;
+        //     }
+        //     else
+        //     {
+        //       throw std::invalid_argument("");
+        //     }
+        //   }
+        //   upmem_sim::util::StatFactory *system_stat_factory = owner->dpu_system->stat_factory();
+        //   for (auto &stat : system_stat_factory->stats())
+        //   {
+        //     std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+        //   }
+        //   owner->is_dpu_finished = true;
+        // }
         break;
       default:
         printf("DpuPort: recvTimingResp unknown type %d\n", msg->type);

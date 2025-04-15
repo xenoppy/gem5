@@ -16,9 +16,10 @@ namespace upmem_sim
   {
     DPU_INIT,
     DPU_LOAD,
+    DPU_TRANS,
     DPU_LAUNCH,
     DPU_UPDATE,
-    DPU_CHECK_FINISHED,
+    DPU_CHECK,
     //ASYNCHRONOUS
     DPU_INIT_ASYNCHRONOUS = 100,
     DPU_LOAD_ASYNCHRONOUS,
@@ -28,6 +29,13 @@ namespace upmem_sim
     DPU_FINISHED=200,
     DPU_UPDATE_SYSTEM,
 
+  };
+  enum dpu_check_target
+  {
+    DPU_CHECK_INIT,
+    DPU_CHECK_MEM,
+    DPU_CHECK_GROUP,
+    DPU_CHECK_ALL,
   };
   enum dpu_launch_policy
   {

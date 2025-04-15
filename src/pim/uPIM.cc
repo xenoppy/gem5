@@ -66,6 +66,14 @@ namespace gem5
                                                      { process_rank_Cycle(); }, name()),
                                     message_cycle_event([this]
                                                      { check_message_Cycle(); }, name()),
+                                    dpu_load_event([this]
+                                                     { process_dpu_load(); }, name()),
+                                    dpu_transport_event([this]
+                                                     { process_dpu_transport(); }, name()),
+                                    dpu_launch_event([this]
+                                                     { process_dpu_launch(); }, name()),
+                                    dpu_check_event([this]
+                                                     { process_dpu_check(); }, name()),
                                     cpusidePort(name() + ".cpu_side", this),
                                     system(nullptr),
                                     sq_(nullptr), cq_(nullptr),
@@ -94,7 +102,7 @@ namespace gem5
             // Read the data from the message_data structure
             // Convert to string
             argv[i] = static_cast<const char*>(msg->data_ptrs[i]->data);
-            std::cout<<"m"<<"uPIM: argv["<<i<<"]: "<<argv[i]<<std::endl;
+            //std::cout<<"m"<<"uPIM: argv["<<i<<"]: "<<argv[i]<<std::endl;
           }
           int argc = msg->data_count;
           for(int i = 0; i < argc; i++) {
@@ -105,9 +113,17 @@ namespace gem5
           argument_parser->parse(argc, argv);
           this->system = new upmem_sim::simulator::System(argument_parser);
 
+          this->start_working();//start rank cycle
           //owner->system->init();
+          printf("uPIM: uPIMulator INIT done, send uPIM system ptr back to CPU\n");
+          PacketPtr pkt = make_pkt();
+          upmem_sim::Dpu_message* resp_msg = makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE_SYSTEM,
+                                    sizeof(upmem_sim::simulator::System*),
+                                    this->system);
+          pkt->dataDynamic<upmem_sim::Dpu_message>(resp_msg);
+          pkt->makeTimingResponse();
+          cpusidePort.sendTimingResp(pkt);
           printf("uPIM: DPU_INIT done\n");
-
           break;
         }
       case upmem_sim::DPU_LOAD_ASYNCHRONOUS:
@@ -122,8 +138,19 @@ namespace gem5
           // This is just a placeholder for actual loading logic
           std::string binary(static_cast<const char*>(msg->data_ptrs[0]->data));
           this->system->set_benchmark(binary); // Set the benchmark name
-          this->system->init();
-          printf("uPIM: Loading binary done: %s\n", binary.c_str());
+          process_dpu_load();
+        } else {
+          printf("uPIM: System not initialized, cannot load binary\n");
+        }
+        break;
+      }
+      case upmem_sim::DPU_TRANS:
+      {
+        // Handle DPU_LOAD message
+        // Load binary or whatever is needed
+        printf("uPIM: DPU_TRANS received\n");
+        if (this->system != nullptr) {
+          process_dpu_transport();
 
         } else {
           printf("uPIM: System not initialized, cannot load binary\n");
@@ -144,7 +171,8 @@ namespace gem5
 
             std::memcpy(&(this->system->launch_policy), msg->data_ptrs[0]->data, sizeof(this->system->launch_policy));
             printf("uPIM: Launching DPU with policy: %d\n", this->system->launch_policy);
-            this->start_working();
+            process_dpu_launch();
+            //this->start_working();
 
           }
           else{
@@ -152,21 +180,6 @@ namespace gem5
           }
         } else {
           printf("uPIM: System not initialized, cannot launch DPU\n");
-        }
-        break;
-      }
-      case upmem_sim::DPU_UPDATE:
-      {
-        // Handle DPU_UPDATE message
-        // Update the DPU state or whatever is needed
-        printf("uPIM: DPU_UPDATE received\n");
-        if (this->system != nullptr) {
-          //Not elegant at all...
-          this->system=reinterpret_cast<upmem_sim::simulator::System *>(const_cast<void *>(msg->data_ptrs[0]->data));
-          printf("uPIM: DPU state updated\n");
-
-        } else {
-          printf("uPIM: System not initialized, cannot update DPU\n");
         }
         break;
       }
@@ -185,46 +198,42 @@ namespace gem5
 
   void uPIM::process_rank_Cycle()
 {
+    if(system != nullptr){
+      system->dpu_check_cycle();
+      system->rank_cycle();
+    }
+    schedule(rank_cycle_event, curTick() + rank_clock);
     //printf("%s: enter process_rank_Cycle\n", this->name().c_str());
-    if(system != nullptr && system->is_benchmark_set)
-    {
-      system->dpu_check_cycle(); // just to check if the system is finished
 
-      // cpusidePort.trySendRetry();
-      if (not system->is_finished())
-      {
-        system->rank_cycle();
-        schedule(rank_cycle_event, curTick() + rank_clock);
-      }
-      else
-      {
-        printf("uPIM: sendTimingResp---is_finished\n");
-        PacketPtr pkt = make_pkt();
-        upmem_sim::Dpu_message* msg = makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE_SYSTEM,
-                                  sizeof(upmem_sim::simulator::System*),
-                                  system);
-        pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
-        pkt->makeTimingResponse();
-        cpusidePort.sendTimingResp(pkt);
-        return;
-      }
-      if (system->is_zombie())
-      {
-        printf("uPIM: sendTimingResp---is_zombie\n");
-        PacketPtr pkt = make_pkt();
-        upmem_sim::Dpu_message* msg = makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE_SYSTEM,
-                                  sizeof(upmem_sim::simulator::System*),
-                                  system);
-        pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
-        pkt->makeTimingResponse();
-        cpusidePort.sendTimingResp(pkt);
-      }
-    }
-    else
-    {
-      // printf("uPIM: system is not initialized\n");
-      schedule(rank_cycle_event, curTick() + rank_clock);
-    }
+    // if(system != nullptr && system->is_benchmark_set)
+    // {
+    //   system->dpu_check_cycle(); // just to check if the system is finished
+
+    //   // cpusidePort.trySendRetry();
+    //   if (system->is_finished())
+    //   {
+    //     printf("uPIM: sendTimingResp---is_finished\n");
+    //     PacketPtr pkt = make_pkt();
+    //     upmem_sim::Dpu_message* msg = makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE_SYSTEM,
+    //                               sizeof(upmem_sim::simulator::System*),
+    //                               system);
+    //     pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
+    //     pkt->makeTimingResponse();
+    //     cpusidePort.sendTimingResp(pkt);
+    //     return;
+    //   }
+    //   if (system->is_zombie())
+    //   {
+    //     printf("uPIM: sendTimingResp---is_zombie\n");
+    //     PacketPtr pkt = make_pkt();
+    //     upmem_sim::Dpu_message* msg = makeSingleDataDpuMessage(upmem_sim::DPU_UPDATE_SYSTEM,
+    //                               sizeof(upmem_sim::simulator::System*),
+    //                               system);
+    //     pkt->dataDynamic<upmem_sim::Dpu_message>(msg);
+    //     pkt->makeTimingResponse();
+    //     cpusidePort.sendTimingResp(pkt);
+    //   }
+    // }
   }
 
   void uPIM:: check_message_Cycle(){
@@ -369,4 +378,35 @@ namespace gem5
     sendPacket(pkt);
   }
 
+  void uPIM::process_dpu_load()
+  {
+    if(system->check_mem_transport_finished()){
+      system->load();
+    }
+    else {
+      schedule(dpu_load_event, curTick() + 10*rank_clock);
+    }
+
+  }
+
+  void uPIM::process_dpu_transport()
+  {
+
+    if(system->check_mem_transport_finished()){
+      system->sched();
+    }
+    else {
+      printf("uPIM: dpu mem transport not finished, reschedule\n");
+      schedule(dpu_transport_event, curTick() + 10*rank_clock);
+    }
+  }
+
+  void uPIM::process_dpu_launch()
+  {
+    system->launch();
+  }
+
+  void uPIM::process_dpu_check()
+  {
+  }
 } // namespace gem5

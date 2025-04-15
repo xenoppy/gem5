@@ -188,6 +188,11 @@ namespace gem5
     //@PIM
     virtual Port &getDpuPort() { return *static_cast<Port *>(nullptr); }
     virtual void sendPacketToDpu(PacketPtr data) {printf("virtual func not implemented\n");exit(1);}
+    virtual void set_uPIM_init_done(bool is_init_done){printf("virtual func not implemented\n");exit(1);}
+    virtual bool check_uPIM_init_done(){printf("virtual func not implemented\n");exit(1);}
+    virtual bool check_uPIM_mem_done(){printf("virtual func not implemented\n");exit(1);}
+    virtual bool check_uPIM_compute_done(){printf("virtual func not implemented\n");exit(1);}
+    virtual bool check_uPIM_all_finished(){printf("virtual func not implemented\n");exit(1);}
     virtual bool checkDpuSystemFinished(){printf("virtual func not implemented\n");exit(1);  }
     virtual void setDpuSystemFinished(bool finished){printf("virtual func not implemented\n");exit(1); }
     virtual void setSQ(RingBuffer<upmem_sim::Dpu_message*>* sq_){printf("virtual func not implemented\n");exit(1); }

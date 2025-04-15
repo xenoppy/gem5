@@ -31,7 +31,12 @@ namespace upmem_sim::simulator
 
 
     }
-
+    void load() { cpu_->init(); }
+    void sched() { cpu_->sched(execuion_); }
+    void launch() { cpu_->launch(); }
+    bool check_mem_transport_finished(){
+      return rank_->check_mem_messages_finished();
+    }
     void init();
     void fini() { cpu_->fini(); }
     void cycle();

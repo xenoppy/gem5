@@ -24,6 +24,29 @@ class Rank {
 
   void read(RankMessage *rank_message);
   void write(RankMessage *rank_message);
+  void insert_mem_message(rank::RankMessage *rank_message) {
+    mem_messages_.insert(rank_message);
+  }
+
+  /// @brief check if all mem messages are addressed
+  /// @return true: all mem messages are finished, false: not all mem messages are finished
+  bool check_mem_messages_finished() {
+    //printf("entering check_mem_messages_finished\n");
+    for (auto &mem_message : mem_messages_) {
+      if (not mem_message->ack()) {
+        return false;
+      }
+    }
+
+
+    for (auto &mem_message : mem_messages_) {
+      printf("all mem_message are acked\n");
+      delete mem_message;
+    }
+    mem_messages_.clear();
+
+    return true;
+  }
 
   void cycle();
 
@@ -33,6 +56,7 @@ class Rank {
  private:
   Address read_bandwidth_;
   Address write_bandwidth_;
+  std::set<rank::RankMessage*> mem_messages_;
 
   std::vector<dpu::DPU *> dpus_;
   std::vector<basic::TimerQueue<RankMessage>*> communication_qs_;

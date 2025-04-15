@@ -120,6 +120,15 @@ namespace gem5
     EventFunctionWrapper message_cycle_event;
     const Tick rank_clock, cpu_clock;
 
+    EventFunctionWrapper dpu_load_event;
+    void process_dpu_load();
+    EventFunctionWrapper dpu_transport_event;
+    void process_dpu_transport();
+    EventFunctionWrapper dpu_launch_event;
+    void process_dpu_launch();
+    EventFunctionWrapper dpu_check_event;
+    void process_dpu_check();
+
     class CPUSidePort : public ResponsePort
     {
     private:

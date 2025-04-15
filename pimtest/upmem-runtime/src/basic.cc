@@ -5,7 +5,20 @@
 #include "basic.hh"
 #include "../include/gem5/m5ops.h"
 
+inline bool dpu_check(upmem_sim::dpu_check_target target){
+  size_t argc=1;
+  upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+  upmem_sim::dpu_check_target* target_ptr=new upmem_sim::dpu_check_target(target);
+  argv_ptr[0] = new upmem_sim::message_data(sizeof(upmem_sim::dpu_check_target),target_ptr);
 
+
+  upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_CHECK,argc,argv_ptr);
+  //printf("init ready to call m5_op, msg type %d\n",msg->type);
+  size_t  ret=m5_dpu_message_sync((void*)msg);
+  //std::cout<<"dpu_check: m5_dpu_message_sync returned: " << ret << std::endl;
+  //printf("dpu_wait_finished: after m5_dpu_message_sync\n");
+  return ret;
+}
 
 
 void dpu_init(int nr_tasklets, char *bindir, char *logdir){
@@ -27,9 +40,9 @@ void dpu_init(int nr_tasklets, char *bindir, char *logdir){
   size_t ret = m5_dpu_message_sync((void*)msg); // Call m5_op to send the message to the simulator
 
   //wait for the simulator to finish
-  while(!dpu_check()){
+  while(!dpu_check(upmem_sim::DPU_CHECK_INIT)){
   }
-  printf("dpu_init finished\n");
+  printf("basic: dpu_init finished\n");
   return;
 
 
@@ -46,13 +59,25 @@ void dpu_load(std::string binary_path)
   //printf("load ready to call m5_op, msg type %d\n",msg->type);
   size_t ret = m5_dpu_message_sync((void*)msg); // Call m5_op to send the message to the simulator
 
-  while(!dpu_check()){
+  while(!dpu_check(upmem_sim::DPU_CHECK_MEM)){
   }
-  printf("dpu_load finished\n");
+  printf("basic: dpu_load finished\n");
 }
 
-void dpu_trans()
+void dpu_trans(std::string binary_path)
 {
+
+  printf("entering dpu_trans\n");
+  size_t argc=1;
+  upmem_sim::message_data** argv_ptr = new upmem_sim::message_data*[argc];
+  argv_ptr[0] = new upmem_sim::message_data(binary_path.size()+1,binary_path.c_str());
+  upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_TRANS,argc,argv_ptr);
+  //printf("load ready to call m5_op, msg type %d\n",msg->type);
+  size_t ret = m5_dpu_message_sync((void*)msg); // Call m5_op to send the message to the simulator
+
+  while(!dpu_check(upmem_sim::DPU_CHECK_MEM)){
+  }
+  printf("basic: dpu_trans finished\n");
 }
 
 void dpu_launch(upmem_sim::dpu_launch_policy policy)
@@ -65,20 +90,17 @@ void dpu_launch(upmem_sim::dpu_launch_policy policy)
   //printf("init ready to call m5_op, msg type %d\n",msg->type);
   size_t ret = m5_dpu_message_sync((void*)msg); // Call m5_op to send the message to the simulator
 
-  while(!dpu_check()){
-  }
-  printf("dpu_launch finished\n");
+  // while(!dpu_check(upmem_sim::DPU_CHECK_GROUP)){
+  // }
+  printf("basic: dpu_launch finished\n");
 }
 
-bool dpu_check(){
-  upmem_sim::Dpu_message *msg = new upmem_sim::Dpu_message(upmem_sim::DPU_CHECK_FINISHED,0,nullptr);
-  //printf("init ready to call m5_op, msg type %d\n",msg->type);
-  size_t  ret=m5_dpu_message_sync((void*)msg);
-  //std::cout<<"dpu_check: m5_dpu_message_sync returned: " << ret << std::endl;
-  if(ret){
-    printf("dpu_check: DPU_CHECK_FINISHED returned true\n");
-  }
-  //printf("dpu_wait_finished: after m5_dpu_message_sync\n");
+bool dpu_check_all()
+{
+  //printf("entering dpu_check_all\n");
+  upmem_sim::dpu_check_target target=upmem_sim::DPU_CHECK_ALL;
+  bool ret=false;
+  ret=dpu_check(target);
   return ret;
 }
 

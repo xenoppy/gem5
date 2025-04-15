@@ -31,7 +31,7 @@ void SchedThread::check(int execution) {
 }
 
 void SchedThread::dma_transfer_input_dpu_mram_heap_pointer_name(int execution) {
-  std::set<rank::RankMessage*> rank_messages;
+  // std::set<rank::RankMessage*> rank_messages;
   for (DPUID dpu_id = 0; dpu_id < num_dpus(); dpu_id++) {
     std::stringstream ss;
     ss << "input_dpu_mram_heap_pointer_name.dpu_id" << dpu_id << "."
@@ -47,26 +47,28 @@ void SchedThread::dma_transfer_input_dpu_mram_heap_pointer_name(int execution) {
           rank::RankMessage::WRITE, dpu_id, sys_used_mram_end_pointer(),
           byte_stream->size(), byte_stream);
       rank_->write(rank_message);
-      rank_messages.insert(rank_message);
+      rank_->insert_mem_message(rank_message);
+      //rank_messages.insert(rank_message);
 
       rank_->dpus()[dpu_id]->dma()->transfer_to_mram(
           sys_used_mram_end_pointer(), byte_stream);
 
-      delete byte_stream;
+      delete byte_stream;//bug? may lead to `use after free` in rank_message(though actually not used in practice)
     }
   }
+  return;
+  // //not used
+  // for (auto & rank_message : rank_messages) {
+  //   while (not rank_message->ack()) {
+  //     rank_->cycle();
+  //   }
 
-  for (auto & rank_message : rank_messages) {
-    while (not rank_message->ack()) {
-      rank_->cycle();
-    }
-
-    delete rank_message;
-  }
+  //   delete rank_message;
+  // }
 }
 
 void SchedThread::dma_transfer_dpu_input_arguments(int execution) {
-  std::set<rank::RankMessage*> rank_messages;
+  // std::set<rank::RankMessage*> rank_messages;
   for (DPUID dpu_id = 0; dpu_id < num_dpus(); dpu_id++) {
     std::stringstream ss;
     ss << "dpu_input_arguments.dpu_id" << dpu_id << "." << execution;
@@ -81,7 +83,8 @@ void SchedThread::dma_transfer_dpu_input_arguments(int execution) {
           rank::RankMessage::WRITE, dpu_id, dpu_input_arguments_pointer(),
           byte_stream->size(), byte_stream);
       rank_->write(rank_message);
-      rank_messages.insert(rank_message);
+      rank_->insert_mem_message(rank_message);
+      // rank_messages.insert(rank_message);
 
       rank_->dpus()[dpu_id]->dma()->transfer_to_wram(
           dpu_input_arguments_pointer(), byte_stream);
@@ -89,18 +92,20 @@ void SchedThread::dma_transfer_dpu_input_arguments(int execution) {
       delete byte_stream;
     }
   }
+  return;
+  // //not used
+  // for (auto & rank_message : rank_messages) {
+  //   while (not rank_message->ack()) {
+  //     //rank_->cycle();
+  //   }
 
-  for (auto & rank_message : rank_messages) {
-    while (not rank_message->ack()) {
-      rank_->cycle();
-    }
-    delete rank_message;
-  }
+  //   delete rank_message;
+  // }
 }
 
 void SchedThread::dma_transfer_output_dpu_mram_heap_pointer_name(
     int execution) {
-  std::set<rank::RankMessage*> rank_messages;
+  // std::set<rank::RankMessage*> rank_messages;
   for (DPUID dpu_id = 0; dpu_id < num_dpus(); dpu_id++) {
     std::stringstream ss;
     ss << "output_dpu_mram_heap_pointer_name.dpu_id" << dpu_id << "."
@@ -116,7 +121,8 @@ void SchedThread::dma_transfer_output_dpu_mram_heap_pointer_name(
                                                 sys_used_mram_end_pointer(),
                                                 byte_stream->size());
       rank_->read(rank_message);
-      rank_messages.insert(rank_message);
+      // rank_messages.insert(rank_message);
+      rank_->insert_mem_message(rank_message);
 
       encoder::ByteStream *mram_byte_stream =
           rank_->dpus()[dpu_id]->dma()->transfer_from_mram(
@@ -131,17 +137,19 @@ void SchedThread::dma_transfer_output_dpu_mram_heap_pointer_name(
       delete mram_byte_stream;
     }
   }
+  return;
+  // //not used
+  // for (auto & rank_message : rank_messages) {
+  //   while (not rank_message->ack()) {
+  //     //rank_->cycle();
+  //   }
 
-  for (auto & rank_message : rank_messages) {
-    while (not rank_message->ack()) {
-      rank_->cycle();
-    }
-    delete rank_message;
-  }
+  //   delete rank_message;
+  // }
 }
 
 void SchedThread::dma_transfer_dpu_results(int execution) {
-  std::set<rank::RankMessage*> rank_messages;
+  // std::set<rank::RankMessage*> rank_messages;
   for (DPUID dpu_id = 0; dpu_id < num_dpus(); dpu_id++) {
     std::stringstream ss;
     ss << "dpu_results.dpu_id" << dpu_id << "." << execution;
@@ -156,7 +164,8 @@ void SchedThread::dma_transfer_dpu_results(int execution) {
           new rank::RankMessage(rank::RankMessage::READ, dpu_id,
                                 dpu_results_pointer(), byte_stream->size());
       rank_->read(rank_message);
-      rank_messages.insert(rank_message);
+      // rank_messages.insert(rank_message);
+      rank_->insert_mem_message(rank_message);
 
       encoder::ByteStream *wram_byte_stream =
           rank_->dpus()[dpu_id]->dma()->transfer_from_wram(
@@ -171,13 +180,15 @@ void SchedThread::dma_transfer_dpu_results(int execution) {
       delete wram_byte_stream;
     }
   }
+  return;
+  // //not used
+  // for (auto & rank_message : rank_messages) {
+  //   while (not rank_message->ack()) {
+  //     //rank_->cycle();
+  //   }
 
-  for (auto & rank_message : rank_messages) {
-    while (not rank_message->ack()) {
-      rank_->cycle();
-    }
-    delete rank_message;
-  }
+  //   delete rank_message;
+  // }
 }
 
 }  // namespace upmem_sim::simulator::cpu

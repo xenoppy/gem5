@@ -76,9 +76,11 @@ namespace gem5
      * been processed, the "outstanding" counter is decremented. Once the
      * count is zero, the entire larger access is complete.
      */
-    bool is_dpu_sent = false;
+    //@PIM
+    bool is_uPIM_init_done_ = false;
+    bool is_uPIM_mem_done_ = false;
+    bool is_uPIM_compute_done_ = false;
 
-    void dpuinit();
     class SplitMainSenderState : public Packet::SenderState
     {
     public:
@@ -323,6 +325,72 @@ namespace gem5
     {
       return dpuPort;
     };
+    //@PIM
+    bool check_uPIM_init_done() override
+    {
+      return is_uPIM_init_done_;
+    }
+    bool check_uPIM_mem_done() override
+    {
+      return dpu_system->check_mem_transport_finished();
+    }
+    bool check_uPIM_compute_done() override
+    {
+      return dpu_system->is_zombie();
+    }
+    void set_uPIM_init_done(bool is_init_done) override
+    {
+      is_uPIM_init_done_ = is_init_done;
+      return;
+    }
+
+    virtual bool check_uPIM_all_finished() override
+    {
+      //printf("%s: enter check_uPIM_all_finished\n", this->name().c_str());
+      if (not this->dpu_system->is_finished())
+      {
+        if(this->dpu_system->is_zombie())
+        {
+          this->dpu_system->cpu_check_cycle();
+        }
+        return false;
+      }
+      else
+      {
+        printf("%s: enter dpu_system->is_finished\n", this->name().c_str());
+        this->dpu_system->fini();
+        for (auto &option : this->dpu_system->get_argument_parser()->options())
+        {
+          if (this->dpu_system->get_argument_parser()->option_type(option) ==
+              upmem_sim::util::ArgumentParser::INT)
+          {
+            std::cout << option << ": " << this->dpu_system->get_argument_parser()->get_int_parameter(option)
+                      << std::endl;
+          }
+          else if (this->dpu_system->get_argument_parser()->option_type(option) ==
+                  upmem_sim::util::ArgumentParser::STRING)
+          {
+            std::cout << option << ": "
+                      << this->dpu_system->get_argument_parser()->get_string_parameter(option) << std::endl;
+          }
+          else
+          {
+            throw std::invalid_argument("");
+          }
+        }
+        upmem_sim::util::StatFactory *system_stat_factory = this->dpu_system->stat_factory();
+        for (auto &stat : system_stat_factory->stats())
+        {
+          std::cout << stat << ": " << system_stat_factory->value(stat) << std::endl;
+        }
+        this->is_dpu_finished = true;
+        return true;
+      }
+
+    }
+
+
+
     //@PIM
     void sendPacketToDpu(PacketPtr pkt) override
     {
